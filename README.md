@@ -5,11 +5,11 @@ Little set of executables to print out [ISO8601 w/Combined Date & Time](https://
 This is similar to Bash and Zsz's EPOCHREALTIME
 
 ## Executables
-Executable|Language
-:---:|:---:
-cdate | C
-ccdate | C++
-sdate | Swift
+Executable|Language|Notes
+:---:|:---:|:---:
+cdate | C | GCC 14
+ccdate | C++ | C++14 
+sdate | Swift |  
 
 ## Building
 ```
