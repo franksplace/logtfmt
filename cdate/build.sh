@@ -26,6 +26,10 @@ fi
 BOPTS=''
 $DEBUG && BOPTS="-v"
 
+if ! gcc --version >/dev/null 2>&1; then
+  mlog FATAL "gnu gcc is not installed" 1
+fi
+
 if out=$(gcc -o "bin/${APP_NAME}" $BOPTS -Wall "${BASEDIR}"/"$APP_NAME".c 2>&1); then
   mlog SUCCESS "Successfully build $APP_NAME (binary installed at bin/$APP_NAME)"
   if [ -n "$out" ] && $DEBUG; then
