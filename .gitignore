@@ -50,3 +50,15 @@ modules.order
 Module.symvers
 Mkfile.old
 dkms.conf
+.build
+.build?
+.build-logs
+.build-logs?
+._*
+.Spotlight-V100
+.Trashes
+.DS_Store
+.DS_Store?
+*.log
+bin
+bin?
