@@ -16,7 +16,7 @@ APP_NAME="$(basename "$BASEDIR")"
 ###########################
 # Functions
 ###########################
-declare -g -f LOGTFMT color mlog cecho signit
+declare -g -f LOGTFMT color mlog cecho signit gccVerCheck c++VerCheck
 
 function LOGTFMT() {
   local t=$EPOCHREALTIME
@@ -133,12 +133,48 @@ function signit() {
   fi
 }
 
+function gccVerCheck() {
+  declare -g C_CMD=''
+  declare x='' vcheck='' 
+  for x in $(type -afp gcc gcc14 gcc-14 2>/dev/null >&1)
+  do
+    vcheck=$($x --version | head -1 | grep GCC | grep -E -c ' 14.[1-9].[0-9]| 15.' | xargs 2>/dev/null >&1)
+    if [ -n "$vcheck" ] && [ "$vcheck" -eq 1 ] ; then
+      C_CMD="$x"
+      break
+    fi
+  done
+  if [ -z "$C_CMD" ] ; then
+    mlog FATAL "GNU gcc ver 14+ is not installed" 1
+  fi
+  mlog DEBUG "C_CMD=$C_CMD"
+}
+
+function c++VerCheck() {
+  declare -g CC_CMD=''
+  declare x='' vcheck='' 
+  for x in $(type -afp c++ c++14 c++-14 2>/dev/null >&1)
+  do
+    vcheck=$($x --version | head -1 | grep GCC | grep -E -c ' 14.[1-9].[0-9]| 15.' | xargs 2>/dev/null >&1)
+    if [ -n "$vcheck" ] && [ "$vcheck" -eq 1 ] ; then
+      CC_CMD="$x"
+      break
+    fi
+  done
+  if [ -z "$CC_CMD" ] ; then
+    mlog FATAL "GNU gcc ver 14+ is not installed" 1
+  fi
+  mlog DEBUG "CC_CMD=$CC_CMD"
+}
+
 # Export the functions for children and when soucred
 export -f mlog
 export -f color
 export -f cecho
 export -f signit
 export -f LOGTFMT
+export -f gccVerCheck
+export -f c++VerCheck
 ###########################
 # Main
 ###########################

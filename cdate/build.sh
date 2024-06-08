@@ -26,11 +26,16 @@ fi
 BOPTS=''
 $DEBUG && BOPTS="-v"
 
-if ! gcc --version >/dev/null 2>&1; then
-  mlog FATAL "gnu gcc is not installed" 1
+gccVerCheck
+if [ -z "$C_CMD" ] ; then # check extra santity to make sure gccVerCheck set it
+  mlog FATAL "GCC 14+ version not installed" 1
 fi
 
-if out=$(gcc -o "bin/${APP_NAME}" $BOPTS -Wall "${BASEDIR}"/"$APP_NAME".c 2>&1); then
+if [ "$(uname)" == "Linux" ] ; then
+  BOPTS+=" -static -static-libgcc -static-libstdc++"
+fi
+
+if out=$($C_CMD -o "bin/${APP_NAME}" $BOPTS -Wall "${BASEDIR}"/"$APP_NAME".c 2>&1); then
   mlog SUCCESS "Successfully build $APP_NAME (binary installed at bin/$APP_NAME)"
   if [ -n "$out" ] && $DEBUG; then
     mlog DEBUG "$out"
