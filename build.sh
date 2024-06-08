@@ -24,7 +24,11 @@ function LOGTFMT() {
 }
 
 function color {
-  [[ -z "$CLICOLOR" ]] && return # if CLI is not color enabled return
+  if ! $COLOR_FLAG 2>/dev/null ; then
+    if [ -z "$CLICOLOR" ] ; then
+      return
+    fi
+  fi
 
   declare -a codes
   while [[ $# -gt 0 ]]; do
