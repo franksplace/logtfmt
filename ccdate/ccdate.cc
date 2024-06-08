@@ -5,11 +5,6 @@ int main()
 {
   using namespace std;
   using namespace chrono;
-
-  auto utc_now = floor<microseconds>(system_clock::now());
-  auto micro = zoned_time{current_zone(), utc_now};
-  cout << format("{0:%F}T{0:%T%z}", micro) << endl;
+  cout << format("{0:%F}T{0:%T%z}", zoned_time{current_zone(), floor<microseconds>(system_clock::now())}) << endl;
   return 0;
 }
-
-
