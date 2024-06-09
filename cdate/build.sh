@@ -27,19 +27,21 @@ BOPTS=''
 $DEBUG && BOPTS="-v"
 
 gccVerCheck
-if [ -z "$C_CMD" ] ; then # check extra santity to make sure gccVerCheck set it
-  mlog FATAL "GCC 14+ version not installed" 1
+if [ -z "$C_CMD" ]; then # check extra santity to make sure gccVerCheck set it
+  mlog FATAL "GCC 11+ version not installed" 1
 fi
 
-if [ "$(uname)" == "Linux" ] ; then
+if [ "$(uname)" == "Linux" ]; then
   BOPTS+=" -static -static-libgcc -static-libstdc++"
 fi
 
-if out=$($C_CMD -o "bin/${APP_NAME}" $BOPTS -Wall "${BASEDIR}"/"$APP_NAME".c 2>&1); then
+FULL_CMD="$C_CMD -o "bin/${APP_NAME}" $BOPTS -Wall "${BASEDIR}/$APP_NAME".c"
+if out="$($FULL_CMD 2>&1)"; then
   mlog SUCCESS "Successfully build $APP_NAME (binary installed at bin/$APP_NAME)"
   if [ -n "$out" ] && $DEBUG; then
+    mlog DEBUG "Compilation Command=$FULL_CMD"
     mlog DEBUG "$out"
   fi
 else
-  mlog ERROR "Failed to build $APP_NAME\n$out"
+  mlog ERROR "Failed to build $APP_NAME\nComplication Command=$FULL_CMD\n$out"
 fi

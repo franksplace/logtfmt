@@ -1,31 +1,23 @@
 #include <stdio.h>
-#include <time.h>
 #include <sys/time.h>
-#include <string.h>
-#include <math.h>
 
-int local_system_timestamp(char[]);
+int main () {
+  struct timespec now;
+  struct tm tm;
+  int exitval = clock_gettime(CLOCK_REALTIME, &now);
 
-int main(void) {
-    char buf[31];
-    local_system_timestamp(buf);
-    printf("%s\n", buf);
-}
+  tzset();
+  localtime_r(&now.tv_sec, &tm);
 
-int local_system_timestamp(char buf[]) {
-    const int tmpsize = 21;
-    char tzchar[5];
-    struct timespec now;
-    struct tm tm;
-    int retval = clock_gettime(CLOCK_REALTIME, &now);
+  char buf[sizeof "9999-01-02T01:02:03.999999+0000"];
+  size_t bufsize = sizeof buf;
 
-    tzset();
-    localtime_r(&now.tv_sec, &tm);
+  int off = 0;
 
-    strftime(buf, tmpsize, "%Y-%m-%dT%H:%M:%S.", &tm);
-    strftime(tzchar, 5, "%z", &tm);
-    
-    int micro = lrint(now.tv_nsec/1000.000);
-    sprintf(buf + strlen(buf), "%03d%s", micro, tzchar);
-    return retval;
+  off = strftime(buf, bufsize, "%FT%T", &tm);
+  off += snprintf(buf+off, bufsize-off, ".%03ld", now.tv_nsec/1000);
+  off += strftime(buf+off, bufsize-off, "%z", &tm);
+
+  printf("%s\n", buf);
+  return exitval;
 }

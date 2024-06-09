@@ -24,8 +24,8 @@ function LOGTFMT() {
 }
 
 function color {
-  if ! $COLOR_FLAG 2>/dev/null ; then
-    if [ -z "$CLICOLOR" ] ; then
+  if ! $COLOR_FLAG 2>/dev/null; then
+    if [ -z "$CLICOLOR" ]; then
       return
     fi
   fi
@@ -135,16 +135,15 @@ function signit() {
 
 function gccVerCheck() {
   declare -g C_CMD=''
-  declare x='' vcheck='' 
-  for x in $(type -afp gcc gcc14 gcc-14 2>/dev/null >&1)
-  do
-    vcheck=$($x --version | head -1 | grep GCC | grep -E -c ' 14.[1-9].[0-9]| 15.' | xargs 2>/dev/null >&1)
-    if [ -n "$vcheck" ] && [ "$vcheck" -eq 1 ] ; then
+  declare x='' vcheck=''
+  for x in $(type -afp gcc gcc14 gcc-14 gcc13 gcc-13 gcc12 gcc-12 gcc11 gcc-11 2>/dev/null >&1); do
+    vcheck=$($x --version | head -1 | grep GCC | grep -E -c ' 1[1-5].[0-9].[0-9]| 1[1-5].' | xargs 2>/dev/null >&1)
+    if [ -n "$vcheck" ] && [ "$vcheck" -eq 1 ]; then
       C_CMD="$x"
       break
     fi
   done
-  if [ -z "$C_CMD" ] ; then
+  if [ -z "$C_CMD" ]; then
     mlog FATAL "GNU gcc ver 14+ is not installed" 1
   fi
   mlog DEBUG "C_CMD=$C_CMD"
@@ -152,16 +151,15 @@ function gccVerCheck() {
 
 function c++VerCheck() {
   declare -g CC_CMD=''
-  declare x='' vcheck='' 
-  for x in $(type -afp c++ c++14 c++-14 2>/dev/null >&1)
-  do
+  declare x='' vcheck=''
+  for x in $(type -afp c++ c++14 c++-14 2>/dev/null >&1); do
     vcheck=$($x --version | head -1 | grep GCC | grep -E -c ' 14.[1-9].[0-9]| 15.' | xargs 2>/dev/null >&1)
-    if [ -n "$vcheck" ] && [ "$vcheck" -eq 1 ] ; then
+    if [ -n "$vcheck" ] && [ "$vcheck" -eq 1 ]; then
       CC_CMD="$x"
       break
     fi
   done
-  if [ -z "$CC_CMD" ] ; then
+  if [ -z "$CC_CMD" ]; then
     mlog FATAL "GNU gcc ver 14+ is not installed" 1
   fi
   mlog DEBUG "CC_CMD=$CC_CMD"

@@ -24,23 +24,25 @@ if [ ! -d "bin" ]; then
 fi
 
 BOPTS=''
-BOPTS+="-O2 -s -DNDEBUG"
+BOPTS+="-O2 -DNDEBUG"
 $DEBUG && BOPTS="-v"
- 
+
 c++VerCheck
-if [ -z "$CC_CMD" ] ; then # check extra santity to make sure c++VerCheck set it
+if [ -z "$CC_CMD" ]; then # check extra santity to make sure c++VerCheck set it
   mlog FATAL "GCC 14+ version not installed" 1
 fi
 
-if [ "$(uname)" == "Linux" ] ; then
+if [ "$(uname)" == "Linux" ]; then
   BOPTS+=" -static -static-libgcc -static-libstdc++ "
 fi
 
-if out=$($CC_CMD -std=c++20 -o "bin/${APP_NAME}" $BOPTS -Wall -pedantic "${BASEDIR}"/"$APP_NAME".cc 2>&1); then
+FULL_CMD="$CC_CMD -std=c++20 -o "bin/${APP_NAME}" $BOPTS -Wall -pedantic "${BASEDIR}/$APP_NAME".cc"
+if out="$($FULL_CMD 2>&1)"; then
   mlog SUCCESS "Successfully build $APP_NAME (binary installed at bin/$APP_NAME)"
   if [ -n "$out" ] && $DEBUG; then
+    mlog DEBUG "Compilation Command=$FULL_CMD"
     mlog DEBUG "$out"
   fi
 else
-  mlog ERROR "Failed to build $APP_NAME\n$out"
+  mlog ERROR "Failed to build $APP_NAME\nComplication Command=$FULL_CMD\n$out"
 fi
