@@ -1,7 +1,7 @@
 #!/usr/bin/env zsh
 
 if ! hyperfine --version >/dev/null 2>&1 ; then
-  echo "hyperfine is required to run benchmark"
+  echo "hyperfine is required to run benchmark (https://github.com/sharkdp/hyperfine)"
   exit 1
 fi
 #
@@ -12,10 +12,21 @@ ABSPATH="$(
 )"
 BASEDIR="$(dirname "$ABSPATH")"
 
+if date --version >/dev/null 2>&1 ; then
+  GDATE_CMD=date
+else
+  if type -p gdate >/dev/null 2>&1 ; then
+    GDATE_CMD=gdate
+  else
+    echo "gnu date needs to be installed (on macos -> brew install coreutils)"
+    exit 1
+  fi
+fi
+
 hyperfine -i -N \
   -n "Bash  - Epoch Realtime" 'bash -c "t=$EPOCHREALTIME; printf \"%(%FT%T)T.${t#*.}%(%z)T\n\" \"${t%.*}\""' \
   -n "Zsh   - Epoch Realtime" 'zsh -c "print -rP \"%D{%FT%T.%6.%z}\""' \
-  -n "Gnu   - gdate" 'gdate +%FT%T.%6N%z' \
+  -n "Gnu   - date" "$GDATE_CMD +%FT%T.%6N%z" \
   -n "Swift - sdate" bin/sdate \
   -n "C     - cdate" bin/cdate \
   -n "C++   - ccdate" bin/ccdate \
@@ -30,7 +41,7 @@ bash -c 't=$EPOCHREALTIME; printf "%(%FT%T)T.${t#*.}%(%z)T\n" "${t%.*}"'
 printf "%-8s %-20s " "Zsh"   "$(whence -c bash | xargs -I {} ls -lLk {} | awk '{print $5}')kb" 
 zsh -c 'print -rP "%D{%FT%T.%6.%z}"'
 
-printf "%-8s %-20s " "gdate" "$(whence -c gdate | xargs -I {} ls -lLk {} | awk '{print $5}')kb" 
+printf "%-8s %-20s " "$GDATE_CMD" "$(whence -c $GDATE_CMD | xargs -I {} ls -lLk {} | awk '{print $5}')kb" 
 gdate +%FT%T.%6N%z
 
 printf "%-8s %-20s " "sdate" "$(ls -lLk bin/sdate | awk '{print $5}')kb" 
