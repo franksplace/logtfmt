@@ -39,7 +39,7 @@ if [ "$(uname)" == "Darwin" ]; then
   APP_BUILT_BIN="${BASEDIR}/.build/apple/Products/Release/${PACKAGE_APP_NAME}"
 else
   APP_BUILT_BIN="${BASEDIR}/.build/$(arch)-*/release/${PACKAGE_APP_NAME}"
-  BUILD_CMD=(swift build "$BASEDIR" --arch "$(arch)" --static-swift-stdlib --sanitize thread -c release)
+  BUILD_CMD=(swift build --package-path "$BASEDIR" --arch "$(arch)" --static-swift-stdlib --sanitize thread -c release)
 fi
 
 APP_BIN="bin/${APP_NAME}"
