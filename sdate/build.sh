@@ -36,7 +36,11 @@ APP_NAME="$(basename "$BASEDIR")"
 PACKAGE_APP_NAME="$(cd "$BASEDIR" && swift package dump-package | jq -cr '.targets[].name')"
 
 BUILD_LOG=".build-logs/build_$(LOGTFMT).out"
-BUILD_CMD=(swift build --arch arm64 --arch x86_64 --sanitize undefined -c release)
+if [ "$(uname)" == "Darwin" ]; then
+  BUILD_CMD=(swift build --arch arm64 --arch x86_64 --sanitize undefined -c release)
+else
+  BUILD_CMD=(swift build --arch "$(arch)" --sanitize undefined -c release)
+fi
 
 APP_BUILT_BIN="${BASEDIR}/.build/apple/Products/Release/${PACKAGE_APP_NAME}"
 APP_BIN="bin/${APP_NAME}"
