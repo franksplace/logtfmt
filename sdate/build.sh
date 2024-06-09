@@ -98,14 +98,13 @@ fi
 
 if [ ! -d "bin" ]; then
   mlog INFO "Creating bin directory"
-  #  out=$(mkdir bin 2>&1)
   if ! out=$(mkdir bin 2>&1); then
     mlog FATAL "Unable to bin directory"
     if [ -n "$out" ]; then
       mlog FATAL "$out"
     fi
+    exit
   fi
-  exit
 fi
 
 mlog DEBUG "Running ${COPY_CMD[*]}"
