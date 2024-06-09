@@ -42,7 +42,7 @@ printf "%-8s %-20s " "Zsh"   "$(whence -c bash | xargs -I {} ls -lLk {} | awk '{
 zsh -c 'print -rP "%D{%FT%T.%6.%z}"'
 
 printf "%-8s %-20s " "$GDATE_CMD" "$(whence -c $GDATE_CMD | xargs -I {} ls -lLk {} | awk '{print $5}')kb" 
-gdate +%FT%T.%6N%z
+$GDATE_CMD +%FT%T.%6N%z
 
 printf "%-8s %-20s " "sdate" "$(ls -lLk bin/sdate | awk '{print $5}')kb" 
 bin/sdate
