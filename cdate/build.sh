@@ -24,7 +24,7 @@ if [ ! -d "bin" ]; then
 fi
 
 BOPTS=''
-BOPTS+="-O2 -DNDEBUG"
+BOPTS+="-Ofast -s -DNDEBUG"
 $DEBUG && BOPTS="-v"
 
 gccVerCheck
