@@ -2,8 +2,14 @@
 #shellcheck disable=SC2317
 
 # Required Checks to use Script
-[ "$(uname -o)" != "Darwin" ] && echo "MacOS is required" && exit 1
-! swift --version >/dev/null 2>&1 && echo "Xcode Developer Tools are Required" && exit 1
+
+if ! swift --version >/dev/null 2>&1; then
+  if [ "$(uname)" == "Darwin" ]; then
+    echo "Xcode Developer Tools are Required" && exit 1
+  else
+    echo "Swift Toolchain is required" && exit 1
+  fi
+fi
 ! jq --version >/dev/null 2>&1 && echo "jq is required" && exit 1
 
 ###########################
