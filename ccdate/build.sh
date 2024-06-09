@@ -44,5 +44,5 @@ if out="$($FULL_CMD 2>&1)"; then
     mlog DEBUG "$out"
   fi
 else
-  mlog ERROR "Failed to build $APP_NAME\nComplication Command=$FULL_CMD\n$out"
+  mlog ERROR "Failed to build $APP_NAME\nCompilation Command=$FULL_CMD\n$out"
 fi
