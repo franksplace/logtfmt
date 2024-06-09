@@ -15,7 +15,11 @@ fi
 ###########################
 # Configurable Variables
 ###########################
-CODE_SIGNATURE="${BUILD_CODE_SIGNATURE:-$(id -F)}"
+if [ "$(uname)" == "Darwin" ]; then
+  CODE_SIGNATURE="${BUILD_CODE_SIGNATURE:-$(id -F)}"
+else
+  CODE_SIGNATURE="${BUILD_CODE_SIGNATURE:-$(id -un)}"
+fi
 SAVE_LOGS="${BUILD_KEEP_LOGS:-false}"
 SAVE_BUILD_DATA="${BUILD_KEEP_COMPILATION:-false}"
 
@@ -130,6 +134,13 @@ if ! $SAVE_BUILD_DATA; then
   rm -rf .build
 fi
 mlog SUCCESS "Successfully built universal binary $APP_NAME which is found at $APP_BIN"
+if [ "$(uname)" != "Darwin" ]; then
+  mlog "INFO" "Code sign automation only completed for Darwin (MacOS), manual operation is needed"
+  mlog "INFO" "Manual Operation -> 'cargo install apple-codesign --locked' ; rcodesign and Transporter"
+  mlog "INFO" "Good Explanation -> https://gregoryszorc.com/docs/apple-codesign/0.12.0/apple_codesign_getting_started.html#installing"
+  exit
+fi
+
 if signit "$APP_BIN" >>"$BUILD_LOG" 2>&1; then
   mlog SUCCESS "Successfully signed $APP_NAME with ${CODE_SIGNATURE}'s signature"
   if ! $SAVE_LOGS; then
