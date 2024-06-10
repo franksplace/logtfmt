@@ -16,7 +16,7 @@ int main () {
   int off = 0;
 
   off = strftime(buf, bufsize, "%FT%T", &tm);
-  off += snprintf(buf+off, bufsize-off, ".%03ld", now.tv_nsec/1000);
+  off += snprintf(buf+off, bufsize-off, ".%06ld", now.tv_nsec/1000);
   off += strftime(buf+off, bufsize-off, "%z", &tm);
 
   printf("%s\n", buf);
