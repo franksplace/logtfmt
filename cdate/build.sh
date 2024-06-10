@@ -46,7 +46,7 @@ else
   mlog FATAL "Failed to build $APP_NAME\nCompilation Command=$FULL_CMD\n$out" 1
 fi
 
-if $ONLY_STATIC 2>/dev/null || [ "$(uname)" == "Darwin" ]; then
+if [ -n "$ONLY_STATIC" ] || [ "$(uname)" == "Darwin" ]; then
   exit
 fi
 

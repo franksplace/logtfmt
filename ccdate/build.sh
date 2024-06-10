@@ -23,8 +23,7 @@ if [ ! -d "bin" ]; then
   fi
 fi
 
-BOPTS=''
-BOPTS+="-Ofast -s -DNDEBUG"
+BOPTS="-Ofast -s -DNDEBUG"
 $DEBUG && BOPTS="-v"
 
 c++VerCheck
@@ -45,4 +44,22 @@ if out="$($FULL_CMD 2>&1)"; then
   fi
 else
   mlog ERROR "Failed to build $APP_NAME\nCompilation Command=$FULL_CMD\n$out"
+fi
+
+if [ -n "$ONLY_STATIC" ] || [ "$(uname)" == "Darwin" ]; then
+  exit
+fi
+
+BOPTS="-Ofast -s -DNDEBUG"
+$DEBUG && BOPTS="-v"
+
+FULL_CMD="$CC_CMD -std=c++20 -o "bin/${APP_NAME}-dynlink" $BOPTS -Wall -pedantic "${BASEDIR}/$APP_NAME".cc"
+if out="$($FULL_CMD 2>&1)"; then
+  mlog SUCCESS "Successfully build ${APP_NAME}-dynlink (binary installed at bin/${APP_NAME}-dynlink)"
+  if [ -n "$out" ] && $DEBUG; then
+    mlog DEBUG "Compilation Command=$FULL_CMD"
+    mlog DEBUG "$out"
+  fi
+else
+  mlog ERROR "Failed to build ${APP_NAME}-dynlink\nCompilation Command=$FULL_CMD\n$out"
 fi
