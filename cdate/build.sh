@@ -31,8 +31,10 @@ if [ -z "$C_CMD" ]; then # check extra santity to make sure gccVerCheck set it
   mlog FATAL "GCC 11+ version not installed" 1
 fi
 
+STATIC_FLAG=false
 if [ "$(uname)" == "Linux" ]; then
   BOPTS+=" -static -static-libgcc -static-libstdc++"
+  STATIC_FLAG=true
 fi
 
 FULL_CMD="$C_CMD -o "bin/${APP_NAME}" $BOPTS -Wall "${BASEDIR}/$APP_NAME".c"
@@ -41,6 +43,15 @@ if out="$($FULL_CMD 2>&1)"; then
   if [ -n "$out" ] && $DEBUG; then
     mlog DEBUG "Compilation Command=$FULL_CMD"
     mlog DEBUG "$out"
+  fi
+
+  if $STATIC_FLAG; then
+    FULL_CMD="strip --remove-section=.note* bin/${APP_NAME}"
+    if out="$($FULL_CMD 2>&1)"; then
+      mlog SUCCESS "Successfully removed notes from $APP_NAME"
+    else
+      mlog ERROR "Failed to remove notes section from $APP_NAME"
+    fi
   fi
 else
   mlog FATAL "Failed to build $APP_NAME\nCompilation Command=$FULL_CMD\n$out" 1

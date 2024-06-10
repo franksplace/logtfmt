@@ -188,6 +188,7 @@ fi
 B_OPTS=("$(cd "$BASEDIR" && find . -type f -mindepth 2 -maxdepth 2 -name build.sh 2>/dev/null | xargs dirname | sed -e 's#./##g')")
 if [ -z "$1" ]; then
   echo "Valid build targets are "
+  echo "all"
   for b in "${B_OPTS[@]}"; do
     echo "$b"
   done
