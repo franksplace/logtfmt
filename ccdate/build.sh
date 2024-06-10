@@ -31,9 +31,7 @@ if [ -z "$CC_CMD" ]; then # check extra santity to make sure c++VerCheck set it
   mlog FATAL "GCC 14+ version not installed" 1
 fi
 
-STATIC_FLAG=false
 if [ "$(uname)" == "Linux" ]; then
-  STATIC_FLAG=true
   BOPTS+=" -static -static-libgcc -static-libstdc++ "
 fi
 
@@ -45,15 +43,7 @@ if out="$($FULL_CMD 2>&1)"; then
     mlog DEBUG "$out"
   fi
 
-  if $STATIC_FLAG; then
-    FULL_CMD="strip --remove-section=.note* bin/${APP_NAME}"
-    if out="$($FULL_CMD 2>&1)"; then
-      mlog SUCCESS "Successfully removed notes from $APP_NAME"
-    else
-      mlog ERROR "Failed to remove notes section from $APP_NAME"
-    fi
-  fi
-
+  stripit "bin/${APP_NAME}"
 else
   mlog ERROR "Failed to build $APP_NAME\nCompilation Command=$FULL_CMD\n$out"
 fi
@@ -72,6 +62,8 @@ if out="$($FULL_CMD 2>&1)"; then
     mlog DEBUG "Compilation Command=$FULL_CMD"
     mlog DEBUG "$out"
   fi
+
+  stripit "bin/${APP_NAME}-dynlink"
 else
   mlog ERROR "Failed to build ${APP_NAME}-dynlink\nCompilation Command=$FULL_CMD\n$out"
 fi

@@ -123,6 +123,7 @@ if ! $SAVE_BUILD_DATA; then
 fi
 
 mlog SUCCESS "Successfully built universal binary $APP_NAME which is found at $APP_BIN"
+stripit "$APP_BIN"
 
 if [ "$(uname)" != "Darwin" ]; then
   mlog "INFO" "Code sign automation only completed for Darwin (MacOS), manual operation is needed"

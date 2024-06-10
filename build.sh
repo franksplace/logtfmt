@@ -16,7 +16,7 @@ APP_NAME="$(basename "$BASEDIR")"
 ###########################
 # Functions
 ###########################
-declare -g -f LOGTFMT color mlog cecho signit gccVerCheck c++VerCheck
+declare -g -f LOGTFMT color mlog cecho signit gccVerCheck c++VerCheck stripit
 
 function LOGTFMT() {
   local t=$EPOCHREALTIME
@@ -165,6 +165,37 @@ function c++VerCheck() {
   mlog DEBUG "CC_CMD=$CC_CMD"
 }
 
+function stripit() {
+  local FILE=$1
+  local FULL_CMD='' out=''
+
+  [[ -z "$FILE" ]] && mlog ERROR "stripit function requries a file" && return 1
+  [[ ! -r "$FILE" ]] && mlog ERROR "stripit function requires a file to readable " && return 1
+
+  if $DEBUG; then
+    # we don't strip on debug bins
+    return 0
+  fi
+
+  if [ "$(uname)" == "Darwin" ]; then
+    FULL_CMD="strip -x -S -D -no_code_signature_warning ${FILE}"
+  else
+    FULL_CMD="strip --strip-all --remove-section=.note* --remove-section=.gnu.build* ${FILE}"
+  fi
+  if out="$($FULL_CMD 2>&1)"; then
+    mlog SUCCESS "Successfully stripped $FILE"
+    if [ -n "$out" ] && $DEBUG; then
+      mlog DEBUG "Strip Command=$FULL_CMD"
+      mlog DEBUG "$out"
+    fi
+  else
+    mlog ERROR "Failed to strip $FILE"
+    if [ -n "$out" ]; then
+      mlog ERROR "$out"
+    fi
+  fi
+}
+
 # Export the functions for children and when soucred
 export -f mlog
 export -f color
@@ -173,6 +204,7 @@ export -f signit
 export -f LOGTFMT
 export -f gccVerCheck
 export -f c++VerCheck
+export -f stripit
 ###########################
 # Main
 ###########################
