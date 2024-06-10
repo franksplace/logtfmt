@@ -69,7 +69,7 @@ if [ -x "bin/ccdate" ] ; then
 fi
 
 if [ -x "bin/ccdate-dynlink" ] ; then
-  printf "%-15s %-20s " "ccdate" "$(ls -lLk bin/ccdate-dynlink | awk '{print $5}')kb" 
+  printf "%-15s %-20s " "ccdate-dynlink" "$(ls -lLk bin/ccdate-dynlink | awk '{print $5}')kb" 
   bin/ccdate-dynlink
 fi
 
