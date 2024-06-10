@@ -23,8 +23,7 @@ if [ ! -d "bin" ]; then
   fi
 fi
 
-BOPTS=''
-BOPTS+="-Ofast -s -DNDEBUG"
+BOPTS="-Ofast -s -DNDEBUG"
 $DEBUG && BOPTS="-v"
 
 gccVerCheck
@@ -44,5 +43,23 @@ if out="$($FULL_CMD 2>&1)"; then
     mlog DEBUG "$out"
   fi
 else
-  mlog ERROR "Failed to build $APP_NAME\nCompilation Command=$FULL_CMD\n$out"
+  mlog FATAL "Failed to build $APP_NAME\nCompilation Command=$FULL_CMD\n$out" 1
+fi
+
+if $ONLY_STATIC 2>/dev/null || [ "$(uname)" == "Darwin" ]; then
+  exit
+fi
+
+BOPTS="-Ofast -s -DNDEBUG"
+$DEBUG && BOPTS="-v"
+
+FULL_CMD="$C_CMD -o "bin/${APP_NAME}-dynlink" $BOPTS -Wall "${BASEDIR}/$APP_NAME".c"
+if out="$($FULL_CMD 2>&1)"; then
+  mlog SUCCESS "Successfully build ${APP_NAME}-dynlib (binary installed at bin/${APP_NAME}-dynlink)"
+  if [ -n "$out" ] && $DEBUG; then
+    mlog DEBUG "Compilation Command=$FULL_CMD"
+    mlog DEBUG "$out"
+  fi
+else
+  mlog FATAL "Failed to build ${APP_NAME}-dynlink\nCompilation Command=$FULL_CMD\n$out" 1
 fi
