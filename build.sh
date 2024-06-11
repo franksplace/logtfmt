@@ -7,7 +7,12 @@
 [[ -n "$CODE_DEBUG" ]] && set -x
 trap "set +x" HUP INT QUIT TERM EXIT
 
-DATELOG=true
+declare -g -x GCC_MIN_VER=8
+declare -g -x GCC_VENDOR='' # if we want to at some future date require GNU set it like the CPP_VENDOR
+declare -g -x CPP_MIN_VER=14
+declare -g -x CPP_VENDOR='Free Software Foundation'
+
+declare -g -x DATELOG=true
 # shellcheck disable=SC2164
 ABSPATH="$(
   cd "${0%/*}" 2>/dev/null
@@ -187,32 +192,44 @@ function signit() {
 
 function gccVerCheck() {
   declare -g C_CMD=''
-  declare x='' vcheck=''
-  for x in $(type -afp gcc gcc14 gcc-14 gcc13 gcc-13 gcc12 gcc-12 gcc11 gcc-11 2>/dev/null >&1); do
-    vcheck=$($x --version | head -1 | grep GCC | grep -E -c ' 1[1-5].[0-9].[0-9]| 1[1-5].' | xargs 2>/dev/null >&1)
-    if [ -n "$vcheck" ] && [ "$vcheck" -eq 1 ]; then
+  declare x='' gcc_ver=''
+  for x in $(type -afp gcc); do
+    if [ -n "$GCC_VENDOR" ]; then
+      if ! $x --version 2>/dev/null | grep "$GCC_VENDOR" >/dev/null 2>&1; then
+        continue
+      fi
+    fi
+
+    gcc_ver=$($x -dumpversion 2>/dev/null | cut -d. -f1)
+    if [ -n "$gcc_ver" ] && [[ $gcc_ver =~ ^-?[0-9]+$ ]] && [ "$gcc_ver" -ge $GCC_MIN_VER ]; then
       C_CMD="$x"
       break
     fi
   done
   if [ -z "$C_CMD" ]; then
-    mlog FATAL "GNU gcc ver 14+ is not installed" 1
+    mlog FATAL "GNU gcc rev ${GCC_MIN_VER}+ is required" 1
   fi
   mlog DEBUG "C_CMD=$C_CMD"
 }
 
 function c++VerCheck() {
   declare -g CC_CMD=''
-  declare x='' vcheck=''
-  for x in $(type -afp c++ c++14 c++-14 2>/dev/null >&1); do
-    vcheck=$($x --version | head -1 | grep GCC | grep -E -c ' 14.[1-9].[0-9]| 15.' | xargs 2>/dev/null >&1)
-    if [ -n "$vcheck" ] && [ "$vcheck" -eq 1 ]; then
+  declare x='' cpp_ver=''
+  for x in $(type -afp c++ c++${CPP_MIN_VER} c++14 c++-14 c++15 c++15 2>/dev/null >&1); do
+    if [ -n "$CPP_VENDOR" ]; then
+      if ! $x --version 2>/dev/null | grep "$CPP_VENDOR" >/dev/null 2>&1; then
+        continue
+      fi
+    fi
+
+    cpp_ver=$($x -dumpversion 2>/dev/null | cut -d. -f1)
+    if [ -n "$cpp_ver" ] && [[ $cpp_ver =~ ^-?[0-9]+$ ]] && [ "$cpp_ver" -ge $CPP_MIN_VER ]; then
       CC_CMD="$x"
       break
     fi
   done
   if [ -z "$CC_CMD" ]; then
-    mlog FATAL "GNU gcc ver 14+ is not installed" 1
+    mlog FATAL "GNU gcc ver ${CPP_MIN_VER} +is not installed" 1
   fi
   mlog DEBUG "CC_CMD=$CC_CMD"
 }
