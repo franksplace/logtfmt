@@ -7,9 +7,9 @@ This is similar to Bash and Zsz's EPOCHREALTIME
 ## Executables
 Executable|Language|Notes
 :---:|:---:|:---:
-cdate | C | GCC 14
-ccdate | C++ | C++14 
-sdate | Swift |  
+cdate | C | GCC 8+
+ccdate | C++ | GCC 14+
+sdate | Swift | Swift 5.10+ 
 
 ## Building
 ```

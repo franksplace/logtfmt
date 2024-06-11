@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 #shellcheck disable=SC2317
 
-[[ -n "$CODE_DEBUG" ]] && set -x
+[[ -n "$BUILD_DEBUG" ]] && set -x
 trap "set +x" HUP INT QUIT TERM EXIT
 
 #shellcheck disable=SC2164
@@ -15,15 +15,9 @@ APP_NAME="$(basename "$BASEDIR")"
 if ! declare -f mlog >/dev/null 2>&1; then
   source "$BASEDIR/../build.sh"
 fi
+swiftVerCheck
 
 # Required Checks to use Script
-if ! swift --version >/dev/null 2>&1; then
-  if [ "$(uname)" == "Darwin" ]; then
-    mlog ERROR "Xcode Developer Tools are Required" 1
-  else
-    mlog ERROR "Swift Toolchain is required" 1
-  fi
-fi
 ! jq --version >/dev/null 2>&1 && mlog ERROR "jq is required" 1
 
 ###########################
@@ -43,11 +37,11 @@ SAVE_BUILD_DATA="${BUILD_KEEP_COMPILATION:-false}"
 PACKAGE_APP_NAME="$(cd "$BASEDIR" && swift package dump-package | jq -cr '.targets[].name')"
 
 if [ "$(uname)" == "Darwin" ]; then
-  BUILD_CMD=(swift build --package-path "$BASEDIR" --arch arm64 --arch x86_64 --sanitize thread -c release)
+  BUILD_CMD=("$SWIFT_CMD" build --package-path "$BASEDIR" --arch arm64 --arch x86_64 --sanitize thread -c release)
   APP_BUILT_BIN="${BASEDIR}/.build/apple/Products/Release/${PACKAGE_APP_NAME}"
 else
   APP_BUILT_BIN="${BASEDIR}/.build/release/${PACKAGE_APP_NAME}"
-  BUILD_CMD=(swift build --package-path "$BASEDIR" --arch "$(arch)" --sanitize thread -c release)
+  BUILD_CMD=("$SWIFT_CMD" build --package-path "$BASEDIR" --arch "$(arch)" --sanitize thread -c release)
 fi
 
 APP_BIN="bin/${APP_NAME}"

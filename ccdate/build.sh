@@ -3,7 +3,7 @@
 ###########################
 # General Variables
 ###########################
-[[ -n "$CODE_DEBUG" ]] && set -x
+[[ -n "$BUILD_DEBUG" ]] && set -x
 trap "set +x" HUP INT QUIT TERM EXIT
 
 # shellcheck disable=SC2164
@@ -17,6 +17,7 @@ APP_NAME="$(basename "$BASEDIR")"
 if ! declare -f mlog >/dev/null 2>&1; then
   source "$BASEDIR/../build.sh"
 fi
+c++VerCheck
 
 if [ ! -d "bin" ]; then
   mlog INFO "Creating bin directory"
@@ -28,11 +29,6 @@ fi
 
 BOPTS="-Ofast -s -DNDEBUG"
 bcheck DEBUG && BOPTS="-v"
-
-c++VerCheck
-if [ -z "$CC_CMD" ]; then # check extra santity to make sure c++VerCheck set it
-  mlog FATAL "GCC 14+ version not installed" 1
-fi
 
 if [ "$(uname)" == "Linux" ]; then
   BOPTS+=" -static -static-libgcc -static-libstdc++ "

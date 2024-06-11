@@ -4,13 +4,14 @@
 ###########################
 # General Variables
 ###########################
-[[ -n "$CODE_DEBUG" ]] && set -x
+[[ -n "$BUILD_DEBUG" ]] && set -x
 trap "set +x" HUP INT QUIT TERM EXIT
 
 declare -g -x GCC_MIN_VER=8
 declare -g -x GCC_VENDOR='' # if we want to at some future date require GNU set it like the CPP_VENDOR
 declare -g -x CPP_MIN_VER=14
 declare -g -x CPP_VENDOR='Free Software Foundation'
+declare -g -x SWIFT_MIN_VER=5.10
 
 declare -g -x DATELOG=true
 # shellcheck disable=SC2164
@@ -24,7 +25,8 @@ APP_NAME="$(basename "$BASEDIR")"
 ###########################
 # Functions
 ###########################
-declare -g -f LOGTFMT bcheck color mlog cecho signit gccVerCheck c++VerCheck stripit
+declare -g -f LOGTFMT bcheck color mlog cecho signit gccVerCheck
+declare -g -f c++VerCheck swiftVerCheck stripit compareSemanticVersions
 
 # little function to mimic boolean checks if user did not properly set 0/false or 1/true
 function bcheck() {
@@ -109,6 +111,8 @@ function mlog() {
       true
     elif bcheck VERBOSE && [ "$TYPE" == "VERBOSE" ]; then
       true
+    elif bcheck BUILD_DEBUG && [ "$TYPE" == "BUILD_DEBUG" ]; then
+      true
     else
       return
     fi
@@ -121,6 +125,7 @@ function mlog() {
   WARN) TYPE_OUT=$(cecho yellow "$TYPE ") ;;
   DEBUG) TYPE_OUT=$(cecho magenta "$TYPE ") ;;
   VERBOSE) TYPE_OUT=$(cecho brightcyan "$TYPE") ;;
+  BUILD_DEBUG) TYPE_OUT=$(cecho brightgreen "$TYPE") ;;
   FATAL | ERROR | CRITICAL)
     TYPE_OUT=$(cecho red "$TYPE ")
     ERRFLAG=true
@@ -190,6 +195,63 @@ function signit() {
   fi
 }
 
+function compareSemanticVersions() {
+  # return 0 is equal
+  # return 1 is >
+  # return 2 is <
+  if [ $# -lt 2 ]; then
+    mlog FATAL "can't compare Semantic Versions if variables are not passed"
+    mlog FATAL "Usage: compareSemanticVersions var1 var2 " 10
+  fi
+
+  mlog BUILD_DEBUG "Semantic Compare $1 to $2"
+
+  if [[ "$1" == "$2" ]]; then
+    return 0
+  fi
+
+  local IFS=.
+  # Everything after the first character not in [^0-9.] is compared
+  #shellcheck disable=SC2206
+  local i a=(${1%%[^0-9.]*}) b=(${2%%[^0-9.]*})
+  #shellcheck disable=SC2295
+  local arem=${1#${1%%[^0-9.]*}} brem=${2#${2%%[^0-9.]*}}
+  for ((i = 0; i < ${#a[@]} || i < ${#b[@]}; i++)); do
+    if ((10#${a[i]:-0} < 10#${b[i]:-0})); then
+      return 2
+    elif ((10#${a[i]:-0} > 10#${b[i]:-0})); then
+      return 1
+    fi
+  done
+  if [ "$arem" '<' "$brem" ]; then
+    return 2
+  elif [ "$arem" '>' "$brem" ]; then
+    return 1
+  fi
+  return 0
+}
+
+function swiftVerCheck() {
+  declare -g SWIFT_CMD=''
+  declare x='' y='' swift_ver=''
+  for x in $(type -afp swift); do
+    swift_ver="$(for y in $($x --version 2>/dev/null); do [[ "$y" =~ ^\(swift ]] && cut -d- -f2 <<<"$y" && break; done 2>&1)"
+    if [ -n "$swift_ver" ] && [[ $swift_ver =~ ^-?[0-9.\-]+$ ]]; then
+      compareSemanticVersions "$swift_ver" "$SWIFT_MIN_VER"
+      if [ $? -le 1 ]; then
+        SWIFT_CMD="$x"
+        break
+      fi
+    fi
+  done
+  if [ -z "$SWIFT_CMD" ]; then
+    mlog FATAL "Swift version ${SWIFT_MIN_VER}+ is required with " 1
+  fi
+  mlog DEBUG "Swift command:$SWIFT_CMD"
+  mlog VERBOSE "Swift command:$SWIFT_CMD"
+  mlog VERBOSE "Swift version:$swift_ver"
+}
+
 function gccVerCheck() {
   declare -g C_CMD=''
   declare x='' gcc_ver=''
@@ -201,15 +263,20 @@ function gccVerCheck() {
     fi
 
     gcc_ver=$($x -dumpversion 2>/dev/null | cut -d. -f1)
-    if [ -n "$gcc_ver" ] && [[ $gcc_ver =~ ^-?[0-9]+$ ]] && [ "$gcc_ver" -ge $GCC_MIN_VER ]; then
-      C_CMD="$x"
-      break
+    if [ -n "$gcc_ver" ] && [[ $gcc_ver =~ ^-?[0-9.\-]+$ ]]; then
+      compareSemanticVersions "$gcc_ver" "$GCC_MIN_VER"
+      if [ $? -le 1 ]; then
+        C_CMD="$x"
+        break
+      fi
     fi
   done
   if [ -z "$C_CMD" ]; then
     mlog FATAL "GNU gcc rev ${GCC_MIN_VER}+ is required" 1
   fi
-  mlog DEBUG "C_CMD=$C_CMD"
+  mlog DEBUG "GCC command:$C_CMD"
+  mlog VERBOSE "GCC command:$C_CMD"
+  mlog VERBOSE "GCC version:$gcc_ver"
 }
 
 function c++VerCheck() {
@@ -223,15 +290,20 @@ function c++VerCheck() {
     fi
 
     cpp_ver=$($x -dumpversion 2>/dev/null | cut -d. -f1)
-    if [ -n "$cpp_ver" ] && [[ $cpp_ver =~ ^-?[0-9]+$ ]] && [ "$cpp_ver" -ge $CPP_MIN_VER ]; then
-      CC_CMD="$x"
-      break
+    if [ -n "$cpp_ver" ] && [[ $cpp_ver =~ ^-?[0-9]+$ ]]; then
+      compareSemanticVersions "$cpp_ver" "$CPP_MIN_VER"
+      if [ $? -le 1 ]; then
+        CC_CMD="$x"
+        break
+      fi
     fi
   done
   if [ -z "$CC_CMD" ]; then
     mlog FATAL "GNU gcc ver ${CPP_MIN_VER}+ is not installed" 1
   fi
-  mlog DEBUG "CC_CMD=$CC_CMD"
+  mlog DEBUG "C++ command:$CC_CMD"
+  mlog DEBUG "C++ command:$CC_CMD"
+  mlog VERBOSE "C++ version:$cpp_ver"
 }
 
 function stripit() {
@@ -266,7 +338,9 @@ export -f signit
 export -f LOGTFMT
 export -f gccVerCheck
 export -f c++VerCheck
+export -f swiftVerCheck
 export -f stripit
+export -f compareSemanticVersions
 ###########################
 # Main
 ###########################
