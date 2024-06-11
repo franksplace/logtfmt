@@ -319,7 +319,7 @@ function stripit() {
     STRIP_CMD="strip -x -S -D -no_code_signature_warning ${FILE}"
   else
     # If .note.ABI-TAG is set and sometimes need, thus don't remove that note section
-    STRIP_CMD="strip --strip-all --remove-section=.note.[a-z]* --remove-section=.note.[B-Z]* ${FILE}"
+    STRIP_CMD="strip --strip-all --remove-section=.gnu.build* --remove-section=.note.[a-z]* --remove-section=.note.[B-Z]* ${FILE}"
   fi
   mlog VERBOSE "Strip command:$STRIP_CMD"
   if out="$($STRIP_CMD 2>&1)"; then
