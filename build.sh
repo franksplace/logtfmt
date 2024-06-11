@@ -245,7 +245,7 @@ function swiftVerCheck() {
     fi
   done
   if [ -z "$SWIFT_CMD" ]; then
-    mlog FATAL "Swift version ${SWIFT_MIN_VER}+ is required with " 1
+    mlog FATAL "Swift version ${SWIFT_MIN_VER}+ is required" 1
   fi
   mlog DEBUG "Swift command:$SWIFT_CMD"
   mlog VERBOSE "Swift command:$SWIFT_CMD"
