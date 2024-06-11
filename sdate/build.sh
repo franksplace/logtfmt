@@ -4,6 +4,18 @@
 [[ -n "$CODE_DEBUG" ]] && set -x
 trap "set +x" HUP INT QUIT TERM EXIT
 
+#shellcheck disable=SC2164
+ABSPATH="$(
+  cd "${0%/*}" 2>/dev/null
+  echo "$PWD"/"${0##*/}"
+)"
+BASEDIR="$(dirname "$ABSPATH")"
+APP_NAME="$(basename "$BASEDIR")"
+
+if ! declare -f mlog >/dev/null 2>&1; then
+  source "$BASEDIR/../build.sh"
+fi
+
 # Required Checks to use Script
 if ! swift --version >/dev/null 2>&1; then
   if [ "$(uname)" == "Darwin" ]; then
@@ -28,12 +40,6 @@ SAVE_BUILD_DATA="${BUILD_KEEP_COMPILATION:-false}"
 # General Variables
 ###########################
 # shellcheck disable=SC2164
-ABSPATH="$(
-  cd "${0%/*}" 2>/dev/null
-  echo "$PWD"/"${0##*/}"
-)"
-BASEDIR="$(dirname "$ABSPATH")"
-APP_NAME="$(basename "$BASEDIR")"
 PACKAGE_APP_NAME="$(cd "$BASEDIR" && swift package dump-package | jq -cr '.targets[].name')"
 
 if [ "$(uname)" == "Darwin" ]; then
@@ -51,9 +57,6 @@ COPY_CMD=(cp -rp "$APP_BUILT_BIN" "$APP_BIN")
 ###########################
 # Main
 ###########################
-if ! declare -f mlog >/dev/null 2>&1; then
-  source "$BASEDIR/../build.sh"
-fi
 
 if bcheck DEBUG; then
   mlog DEBUG "MODE ENABLED"
