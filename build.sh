@@ -229,7 +229,7 @@ function c++VerCheck() {
     fi
   done
   if [ -z "$CC_CMD" ]; then
-    mlog FATAL "GNU gcc ver ${CPP_MIN_VER} +is not installed" 1
+    mlog FATAL "GNU gcc ver ${CPP_MIN_VER}+ is not installed" 1
   fi
   mlog DEBUG "CC_CMD=$CC_CMD"
 }
