@@ -27,9 +27,9 @@ HYPERFINE_CMD=(hyperfine -i -N \
   -n "Bash  - Epoch Realtime" 'bash -c "t=$EPOCHREALTIME; printf \"%(%FT%T)T.${t#*.}%(%z)T\n\" \"${t%.*}\""' \
   -n "Zsh   - Epoch Realtime" 'zsh -c "print -rP \"%D{%FT%T.%6.%z}\""' \
   -n "Gnu   - date" "$GDATE_CMD +%FT%T.%6N%z" \
-  -n "Swift - sdate" bin/sdate \
 )
 
+[[ -x "bin/sdate"  ]] && HYPERFINE_CMD+=(-n "Swift - sdate" bin/sdate)
 [[ -x "bin/cdate"  ]] && HYPERFINE_CMD+=(-n "C     - cdate)" bin/cdate)
 [[ -x "bin/cdate-dynlink" ]] && HYPERFINE_CMD+=(-n "C     - cdate-dynlink" bin/cdate-dynlink)
 [[ -x "bin/ccdate"  ]] && HYPERFINE_CMD+=(-n "C++   - ccdate" bin/ccdate)
@@ -50,8 +50,10 @@ zsh -c 'print -rP "%D{%FT%T.%6.%z}"'
 printf "%-15s %-20s " "$GDATE_CMD" "$(whence -c $GDATE_CMD | xargs -I {} ls -lLk {} | awk '{print $5}')kb" 
 $GDATE_CMD +%FT%T.%6N%z
 
-printf "%-15s %-20s " "sdate" "$(ls -lLk bin/sdate | awk '{print $5}')kb" 
-bin/sdate
+if [ -x "bin/sdate" ] ; then
+  printf "%-15s %-20s " "sdate" "$(ls -lLk bin/sdate | awk '{print $5}')kb" 
+  bin/sdate
+fi
 
 if [ -x "bin/cdate" ] ; then
   printf "%-15s %-20s " "cdate" "$(ls -lLk bin/cdate | awk '{print $5}')kb" 
