@@ -245,7 +245,7 @@ function swiftVerCheck() {
     fi
   done
   if [ -z "$SWIFT_CMD" ]; then
-    mlog FATAL "Swift version ${SWIFT_MIN_VER}+ is required" 1
+    mlog FATAL "Swift version ${SWIFT_MIN_VER}+ is not installed (or not found in PATH)" 1
   fi
   mlog DEBUG "Swift command:$SWIFT_CMD"
   mlog VERBOSE "Swift command:$SWIFT_CMD"
@@ -272,7 +272,7 @@ function gccVerCheck() {
     fi
   done
   if [ -z "$C_CMD" ]; then
-    mlog FATAL "GNU gcc rev ${GCC_MIN_VER}+ is required" 1
+    mlog FATAL "GNU gcc rev ${GCC_MIN_VER}+ is not installed (or not found in PATH)" 1
   fi
   mlog DEBUG "GCC command:$C_CMD"
   mlog VERBOSE "GCC command:$C_CMD"
@@ -299,7 +299,7 @@ function c++VerCheck() {
     fi
   done
   if [ -z "$CC_CMD" ]; then
-    mlog FATAL "GNU gcc ver ${CPP_MIN_VER}+ is not installed" 1
+    mlog FATAL "GNU gcc ver ${CPP_MIN_VER}+ is not installed (or not found in PATH)" 1
   fi
   mlog DEBUG "C++ command:$CC_CMD"
   mlog DEBUG "C++ command:$CC_CMD"
