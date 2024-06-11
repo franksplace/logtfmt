@@ -279,7 +279,8 @@ if bcheck DEBUG; then
   mlog DEBUG "APP_NAME=$APP_NAME"
 fi
 
-B_OPTS=("$(cd "$BASEDIR" && find . -type f -mindepth 2 -maxdepth 2 -name build.sh 2>/dev/null | xargs dirname | sed -e 's#./##g')")
+#shellcheck disable=SC2038
+B_OPTS=("$(cd "$BASEDIR" && find . -mindepth 2 -maxdepth 2 -name build.sh -exec dirname {} \; 2>/dev/null | xargs -I{} basename '{}')")
 if [ -z "$1" ]; then
   echo "Valid build targets are "
   echo "all"
@@ -290,6 +291,7 @@ if [ -z "$1" ]; then
 fi
 
 if [ "${1^^}" == "ALL" ]; then
+  #shellcheck disable=SC2068
   set -- ${B_OPTS[@]}
 fi
 

@@ -7,12 +7,12 @@ trap "set +x" HUP INT QUIT TERM EXIT
 # Required Checks to use Script
 if ! swift --version >/dev/null 2>&1; then
   if [ "$(uname)" == "Darwin" ]; then
-    echo "Xcode Developer Tools are Required" && exit 1
+    mlog ERROR "Xcode Developer Tools are Required" 1
   else
-    echo "Swift Toolchain is required" && exit 1
+    mlog ERROR "Swift Toolchain is required" 1
   fi
 fi
-! jq --version >/dev/null 2>&1 && echo "jq is required" && exit 1
+! jq --version >/dev/null 2>&1 && mlog ERROR "jq is required" 1
 
 ###########################
 # Configurable Variables
