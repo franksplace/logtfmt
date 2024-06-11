@@ -1,8 +1,10 @@
 #!/usr/bin/env bash
 #shellcheck disable=SC2317
 
-# Required Checks to use Script
+[[ -n "$CODE_DEBUG" ]] && set -x
+trap "set +x" HUP INT QUIT TERM EXIT
 
+# Required Checks to use Script
 if ! swift --version >/dev/null 2>&1; then
   if [ "$(uname)" == "Darwin" ]; then
     echo "Xcode Developer Tools are Required" && exit 1
@@ -53,7 +55,7 @@ if ! declare -f mlog >/dev/null 2>&1; then
   source "$BASEDIR/../build.sh"
 fi
 
-if $DEBUG; then
+if bcheck DEBUG; then
   mlog DEBUG "MODE ENABLED"
   mlog DEBUG "BASEDIR=$BASEDIR"
   mlog DEBUG "APP_NAME=$APP_NAME"
@@ -87,10 +89,9 @@ if ! out="$("${BUILD_CMD[@]}" 2>&1)"; then
   fi
   exit 1
 fi
-if $DEBUG && [ -n "$out" ]; then
-  mlog DEBUG "Compilation Command: ${BUILD_CMD[*]}"
-  mlog DEBUG "Compilation Output:\n$out"
-fi
+mlog DEBUG "Compilation Command: ${BUILD_CMD[*]}"
+mlog VERBOSE "Compilation Command: ${BUILD_CMD[*]}"
+[[ -n "$out" ]] && mlog DEBUG "Compilation Output:\n$out"
 
 if [ ! -f "$APP_BUILT_BIN" ]; then
   mlog FATAL "Unable to find $APP_BUILT_BIN" 1
@@ -108,8 +109,9 @@ if [ ! -d "bin" ]; then
 fi
 
 mlog DEBUG "Running ${COPY_CMD[*]}"
-if ! out="$(${COPY_CMD[@]} 2>&1)"; then
+if ! out="$("${COPY_CMD[@]}" 2>&1)"; then
   mlog SUCCESS "Successfully built universal binary $APP_NAME"
+  mlog VERBOSE "Copy Command=${COPY_CMD[*]}"
   mlog FATAL "Failed to copy the built binary $PACKAGE_APP_NAME to $APP_BIN"
   if [ -n "$OUT" ]; then
     mlog FATAL "$out"
@@ -118,7 +120,7 @@ if ! out="$(${COPY_CMD[@]} 2>&1)"; then
 fi
 
 if ! $SAVE_BUILD_DATA; then
-  mlog DEBUG "Removing "$BASEDIR/.build" directory"
+  mlog DEBUG "Removing '$BASEDIR'/.build directory"
   rm -rf "$BASEDIR/.build"
 fi
 
@@ -132,15 +134,4 @@ if [ "$(uname)" != "Darwin" ]; then
   exit
 fi
 
-if ! out="$(signit "$APP_BIN" 2>&1)"; then
-  mlog FATAL "Failed to sign $APP_NAME with ${CODE_SIGNATURE}'s signature"
-  if [ -n "$out" ]; then
-    mlog FATAL "$out"
-  fi
-  exit 1
-else
-  if $DEBUG && [ -n "$out" ]; then
-    mlog DEBUG "Codesign Output\n$out"
-  fi
-  mlog SUCCESS "Successfully signed $APP_NAME with ${CODE_SIGNATURE}'s signature"
-fi
+signit "$APP_BIN"

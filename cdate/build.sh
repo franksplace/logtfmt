@@ -3,6 +3,9 @@
 ###########################
 # General Variables
 ###########################
+[[ -n "$CODE_DEBUG" ]] && set -x
+trap "set +x" HUP INT QUIT TERM EXIT
+
 # shellcheck disable=SC2164
 ABSPATH="$(
   cd "${0%/*}" 2>/dev/null
@@ -24,7 +27,7 @@ if [ ! -d "bin" ]; then
 fi
 
 BOPTS="-Ofast -s -DNDEBUG"
-$DEBUG && BOPTS="-v"
+bcheck DEBUG && BOPTS="-v"
 
 gccVerCheck
 if [ -z "$C_CMD" ]; then # check extra santity to make sure gccVerCheck set it
@@ -38,10 +41,9 @@ fi
 FULL_CMD="$C_CMD -o "bin/${APP_NAME}" $BOPTS -Wall "${BASEDIR}/$APP_NAME".c"
 if out="$($FULL_CMD 2>&1)"; then
   mlog SUCCESS "Successfully build $APP_NAME (binary installed at bin/$APP_NAME)"
-  if [ -n "$out" ] && $DEBUG; then
-    mlog DEBUG "Compilation Command=$FULL_CMD"
-    mlog DEBUG "$out"
-  fi
+  mlog DEBUG "Compilation Command=$FULL_CMD"
+  mlog VERBOSE "Compilation Command=$FULL_CMD"
+  [[ -n "$out" ]] && mlog DEBUG "$out"
 
   stripit "bin/${APP_NAME}"
 else
@@ -53,15 +55,14 @@ if [ -n "$ONLY_STATIC" ] || [ "$(uname)" == "Darwin" ]; then
 fi
 
 BOPTS="-Ofast -s -DNDEBUG"
-$DEBUG && BOPTS="-v"
+bcheck DEBUG && BOPTS="-v"
 
 FULL_CMD="$C_CMD -o "bin/${APP_NAME}-dynlink" $BOPTS -Wall "${BASEDIR}/$APP_NAME".c"
 if out="$($FULL_CMD 2>&1)"; then
   mlog SUCCESS "Successfully build ${APP_NAME}-dynlib (binary installed at bin/${APP_NAME}-dynlink)"
-  if [ -n "$out" ] && $DEBUG; then
-    mlog DEBUG "Compilation Command=$FULL_CMD"
-    mlog DEBUG "$out"
-  fi
+  mlog DEBUG "Compilation Command=$FULL_CMD"
+  mlog VERBOSE "Compilation Command=$FULL_CMD"
+  [[ -n "$out" ]] && mlog DEBUG "$out"
 
   stripit "bin/${APP_NAME}-dynlink"
 else

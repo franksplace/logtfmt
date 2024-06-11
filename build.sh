@@ -4,6 +4,9 @@
 ###########################
 # General Variables
 ###########################
+[[ -n "$CODE_DEBUG" ]] && set -x
+trap "set +x" HUP INT QUIT TERM EXIT
+
 DATELOG=true
 # shellcheck disable=SC2164
 ABSPATH="$(
@@ -16,7 +19,26 @@ APP_NAME="$(basename "$BASEDIR")"
 ###########################
 # Functions
 ###########################
-declare -g -f LOGTFMT color mlog cecho signit gccVerCheck c++VerCheck stripit
+declare -g -f LOGTFMT bcheck color mlog cecho signit gccVerCheck c++VerCheck stripit
+
+# little function to mimic boolean checks if user did not properly set 0/false or 1/true
+function bcheck() {
+  local out=''
+
+  [[ -z "$1" ]] && echo "Usage:bcheck <variable> (without \$)" && return 2
+  # if variable is not defined automatically false
+  if ! out=$(typeset -p "$1" 2>/dev/null >&1); then
+    return 1
+  fi
+
+  local var=''
+  var="$(echo "${out,,}" | cut -d= -f2- | tr -d \")"
+  if [[ "$var" =~ ^(true|1)$ ]]; then
+    return 0
+  fi
+  # everything else is considered false (thus name=asdf, name=111 , etc)
+  return 1
+}
 
 function LOGTFMT() {
   local t=$EPOCHREALTIME
@@ -78,7 +100,9 @@ function mlog() {
   TYPE=${TYPE^^}
   declare type_check_reg="^(SUCCESS|INFO|ERROR|FATAL|WARN|CRITICAL|NORMAL)$"
   if [[ ! "$TYPE" =~ $type_check_reg ]]; then
-    if $DEBUG && [ "$TYPE" == "DEBUG" ]; then
+    if bcheck DEBUG && [ "$TYPE" == "DEBUG" ]; then
+      true
+    elif bcheck VERBOSE && [ "$TYPE" == "VERBOSE" ]; then
       true
     else
       return
@@ -91,6 +115,7 @@ function mlog() {
   INFO | SUCCESS) TYPE_OUT=$(cecho green "$TYPE ") ;;
   WARN) TYPE_OUT=$(cecho yellow "$TYPE ") ;;
   DEBUG) TYPE_OUT=$(cecho magenta "$TYPE ") ;;
+  VERBOSE) TYPE_OUT=$(cecho brightcyan "$TYPE") ;;
   FATAL | ERROR | CRITICAL)
     TYPE_OUT=$(cecho red "$TYPE ")
     ERRFLAG=true
@@ -98,22 +123,31 @@ function mlog() {
   *) TYPE_OUT="" ;;
   esac
 
-  if $DATELOG; then
-    OUT="$(printf "%-32s %-10s %-17s %-s\n" "$(LOGTFMT)" "$APP_NAME" "$TYPE_OUT" "$MSG")"
+  if [[ $MSG == *$'\n'* ]]; then
+    BIFS=$IFS
+    IFS=$'\n'
+    for x in $MSG; do
+      mlog "$TYPE" "$x"
+    done
+    IFS=$BIFS
   else
-    OUT="$(printf "%-10s %-17s %-s" "$APP_NAME" "$TYPE_OUT" "$MSG")"
-  fi
-  if $ERRFLAG; then
-    echo -e "$OUT" >&2
-  else
-    echo -e "$OUT"
+    if $DATELOG; then
+      OUT="$(printf "%-32s %-10s %-17s %-s\n" "$(LOGTFMT)" "$APP_NAME" "$TYPE_OUT" "$MSG")"
+    else
+      OUT="$(printf "%-10s %-17s %-s" "$APP_NAME" "$TYPE_OUT" "$MSG")"
+    fi
+    if $ERRFLAG; then
+      echo -e "$OUT" >&2
+    else
+      echo -e "$OUT"
+    fi
   fi
 
   [[ -n "$CODE" ]] && exit "$CODE"
 }
 
 function signit() {
-  local APP=$1
+  declare -x APP=$1
   if [ -z "$APP" ] || [ ! -r "$APP" ]; then
     if [ -z "$APP" ]; then
       mlog ERROR "app needs to be defined and reable to signit"
@@ -122,13 +156,31 @@ function signit() {
     fi
     return 1
   fi
-  if codesign -f --sign "$CODE_SIGNATURE" --options=runtime --timestamp "$APP"; then
-    if codesign --display --verbose=4 "$APP"; then
+
+  declare -a FULL_CMD=()
+  declare -x out=''
+
+  local FULL_CMD=(codesign -f --sign "$CODE_SIGNATURE" --options=runtime --timestamp "$APP")
+
+  mlog VERBOSE "Code Sign Command:${FULL_CMD[*]}"
+  mlog DEBUG "Code Sign Command:${FULL_CMD[*]}"
+  if out="$("${FULL_CMD[@]}" 2>&1)"; then
+    FULL_CMD=(codesign --display --verbose=4 "$APP")
+    mlog SUCCESS "Successfully signed $APP with ${CODE_SIGNATURE}'s signature"
+    mlog VERBOSE "Code Sign Verify Command:${FULL_CMD[*]}"
+    mlog DEBUG "Code Sign Verify Command:${FULL_CMD[*]}"
+    if out="$("${FULL_CMD[@]}" 2>&1)"; then
+      mlog SUCCESS "Successfully verified code signature for $APP"
+      [[ -n "$out" ]] && mlog DEBUG "Code Sign Output\n$out"
       return 0
     else
+      mlog ERROR "Failed to verify code signature for $APP"
+      [[ -n "$out" ]] && mlog ERROR "Code Sign Output\n$out"
       return 1
     fi
   else
+    mlog FATAL "Failed to sign $APP with ${CODE_SIGNATURE}'s signature"
+    [[ -n "$out" ]] && mlog FATAL "Code Sign Output\n$out"
     return 1
   fi
 }
@@ -167,36 +219,29 @@ function c++VerCheck() {
 
 function stripit() {
   local FILE=$1
-  local FULL_CMD='' out=''
+  local STRIP_CMD='' out=''
 
   [[ -z "$FILE" ]] && mlog ERROR "stripit function requries a file" && return 1
   [[ ! -r "$FILE" ]] && mlog ERROR "stripit function requires a file to readable " && return 1
 
-  if $DEBUG; then
-    # we don't strip on debug bins
-    return 0
-  fi
+  bcheck DEBUG && mlog DEBUG "We don't strip when DEBUG mode is enabled" && return 0 # we don't strip on debug binaries
 
   if [ "$(uname)" == "Darwin" ]; then
-    FULL_CMD="strip -x -S -D -no_code_signature_warning ${FILE}"
+    STRIP_CMD="strip -x -S -D -no_code_signature_warning ${FILE}"
   else
-    FULL_CMD="strip --strip-all --remove-section=.note* --remove-section=.gnu.build* ${FILE}"
+    STRIP_CMD="strip --strip-all --remove-section=.note* --remove-section=.gnu.build* ${FILE}"
   fi
-  if out="$($FULL_CMD 2>&1)"; then
+  mlog VERBOSE "Strip command:$STRIP_CMD"
+  if out="$($STRIP_CMD 2>&1)"; then
     mlog SUCCESS "Successfully stripped $FILE"
-    if [ -n "$out" ] && $DEBUG; then
-      mlog DEBUG "Strip Command=$FULL_CMD"
-      mlog DEBUG "$out"
-    fi
   else
     mlog ERROR "Failed to strip $FILE"
-    if [ -n "$out" ]; then
-      mlog ERROR "$out"
-    fi
+    [[ -n "$out" ]] && mlog ERROR "$out"
   fi
 }
 
 # Export the functions for children and when soucred
+export -f bcheck
 export -f mlog
 export -f color
 export -f cecho
@@ -211,7 +256,7 @@ export -f stripit
 # If this script is being sorced for the functions don't include the main section
 [[ "${BASH_SOURCE[0]}" != "${0}" ]] && return
 
-if $DEBUG; then
+if bcheck DEBUG; then
   mlog DEBUG "MODE ENABLED"
   mlog DEBUG "BASEDIR=$BASEDIR"
   mlog DEBUG "APP_NAME=$APP_NAME"
