@@ -255,7 +255,7 @@ function swiftVerCheck() {
 function gccVerCheck() {
   declare -g C_CMD=''
   declare x='' gcc_ver=''
-  for x in $(type -afp gcc); do
+  for x in $(type -afp gcc gcc-14 gcc-15); do
     if [ -n "$GCC_VENDOR" ]; then
       if ! $x --version 2>/dev/null | grep "$GCC_VENDOR" >/dev/null 2>&1; then
         continue
@@ -282,7 +282,7 @@ function gccVerCheck() {
 function c++VerCheck() {
   declare -g CC_CMD=''
   declare x='' cpp_ver=''
-  for x in $(type -afp c++ c++${CPP_MIN_VER} c++14 c++-14 c++15 c++15 2>/dev/null >&1); do
+  for x in $(type -afp c++ c++${CPP_MIN_VER} c++14 c++-14 c++15 c++-15 2>/dev/null >&1); do
     if [ -n "$CPP_VENDOR" ]; then
       if ! $x --version 2>/dev/null | grep "$CPP_VENDOR" >/dev/null 2>&1; then
         continue
