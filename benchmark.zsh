@@ -30,7 +30,7 @@ HYPERFINE_CMD=(hyperfine -i -N \
 )
 
 [[ -x "bin/sdate"  ]] && HYPERFINE_CMD+=(-n "Swift - sdate" bin/sdate)
-[[ -x "bin/cdate"  ]] && HYPERFINE_CMD+=(-n "C     - cdate)" bin/cdate)
+[[ -x "bin/cdate"  ]] && HYPERFINE_CMD+=(-n "C     - cdate" bin/cdate)
 [[ -x "bin/cdate-dynlink" ]] && HYPERFINE_CMD+=(-n "C     - cdate-dynlink" bin/cdate-dynlink)
 [[ -x "bin/ccdate"  ]] && HYPERFINE_CMD+=(-n "C++   - ccdate" bin/ccdate)
 [[ -x "bin/ccdate-dynlink"  ]] && HYPERFINE_CMD+=(-n "C++   - ccdate-dynlink" bin/ccdate-dynlink)
