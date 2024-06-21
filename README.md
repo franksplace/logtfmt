@@ -1,25 +1,38 @@
-# logtfmt
+# Log Time & Format (logtfmt)
+
 Little set of executables to print out [ISO8601 w/Combined Date & Time](https://en.wikipedia.org/wiki/ISO_8601#Combined_date_and_time_representations "WikiPedia - ISO 8601 with Combined Date & Time") with microseconds based on clients local timezone.
 (i.e. 2024-05-29T14:19:12.131126-0700)
 
-This is similar to Bash and Zsz's EPOCHREALTIME
+This is similar to Bash and Zsz's EPOCH REALTIME
+
+```ZSH >= 5.6
+print -rP "%D{%FT%T.%6.%z}"
+```
+
+```Bash >= 5.0
+t=$EPOCHREALTIME
+printf "%(%FT%T)T.${t#*.}%(%z)T\n" "${t%.*}"
+```
 
 ## Executables
-Executable|Language|Notes
+
+Executable|Language|Version
 :---:|:---:|:---:
-cdate | C | GCC 8+
-ccdate | C++ | GCC 14+
-sdate | Swift | Swift 5.10+ 
+cdate | C | Clang or GCC 8+
+ccdate | C++ | Clang or GCC 14+
+sdate | Swift | 5.10+
 
 ## Building
-```
-git clone https://github.com/franksplace/logtfmt/
-cd logtfmt
-./build.sh all
+
+```Bash >= 5.0 or Zsh >= 5.6
+    git clone https://github.com/franksplace/logtfmt/
+    cd logtfmt
+    ./build.sh all
 ```
 
 ## Running
-```
+
+```Shell
 cd logtfmt
 ./bin/cdate
 ./bin/sdate
@@ -27,15 +40,36 @@ cd logtfmt
 ```
 
 ### Example
-```
+
+```Shell
 cd logtfmt
 bin/cdate
 2024-05-29T14:19:12.131126-0700
 ```
 
 ## Benchmark
-You'll need to install https://github.com/sharkdp/hyperfine first.
-```
+
+You'll need to install [https://github.com/sharkdp/hyperfine] first.
+
+```Zsh >= 5.6
 cd logtfmt
-./benchmark.sh
+./benchmark.zsh
+```
+
+## License
+
+```Text
+Copyright 2024 Frank Stutz.
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
 ```
