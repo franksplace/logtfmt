@@ -53,7 +53,7 @@ bin/cdate
 
 ## Benchmark
 
-You'll need to install [https://github.com/sharkdp/hyperfine] first.
+You'll need to install [Hyperfine](https://github.com/sharkdp/hyperfine) first.
 
 ```sh
 cd logtfmt
