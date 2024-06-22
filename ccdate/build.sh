@@ -27,39 +27,45 @@ if [ ! -d "bin" ]; then
   fi
 fi
 
-BOPTS="-Ofast -s -DNDEBUG"
-bcheck DEBUG && BOPTS="-v"
+declare -a BOPTS=()
+BOPTS=("-Ofast -s -DNDEBUG")
+bcheck DEBUG && BOPTS+=("-v")
 
 if [ "$(uname)" == "Linux" ]; then
-  BOPTS+=" -static -static-libgcc -static-libstdc++ "
+  BOPTS+=("-static -static-libgcc -static-libstdc++")
 fi
 
-FULL_CMD="$CC_CMD -std=c++20 -o "bin/${APP_NAME}" $BOPTS -Wall -pedantic "${BASEDIR}/$APP_NAME".cc"
-if out="$($FULL_CMD 2>&1)"; then
+declare -a FULL_CMD=()
+
+FULL_CMD=("$CC_CMD" "${BOPTS[@]}" -std=c++20 -o "bin/${APP_NAME}" -Wall -pedantic "${BASEDIR}/$APP_NAME".cc)
+# shellcheck disable=SC2068
+if out=$(${FULL_CMD[@]} 2>&1); then
   mlog SUCCESS "Successfully build $APP_NAME (binary installed at bin/$APP_NAME)"
-  mlog VERBOSE "Compilation Command=$FULL_CMD"
+  mlog DEBUG "Compilation Command=${FULL_CMD[*]}"
+  mlog VERBOSE "Compilation Command=${FULL_CMD[*]}"
   [[ -n "$out" ]] && mlog DEBUG "$out"
 
   stripit "bin/${APP_NAME}"
 else
-  mlog ERROR "Failed to build $APP_NAME\nCompilation Command=$FULL_CMD\n$out"
+  mlog ERROR "Failed to build $APP_NAME\nCompilation Command=${FULL_CMD[*]}\n$out"
 fi
 
 if [ -n "$ONLY_STATIC" ] || [ "$(uname)" == "Darwin" ]; then
   exit
 fi
 
-BOPTS="-Ofast -s -DNDEBUG"
-bcheck DEBUG && BOPTS="-v"
+BOPTS=("-Ofast -s -DNDEBUG")
+bcheck DEBUG && BOPTS+=("-v")
 
-FULL_CMD="$CC_CMD -std=c++20 -o "bin/${APP_NAME}-dynlink" $BOPTS -Wall -pedantic "${BASEDIR}/$APP_NAME".cc"
-if out="$($FULL_CMD 2>&1)"; then
+FULL_CMD=("$CC_CMD" "${BOPTS[@]}" -std=c++20 -o "bin/${APP_NAME}-dynlink" -Wall -pedantic "${BASEDIR}/$APP_NAME".cc)
+# shellcheck disable=SC2068
+if out=$(${FULL_CMD[@]} 2>&1); then
   mlog SUCCESS "Successfully build ${APP_NAME}-dynlink (binary installed at bin/${APP_NAME}-dynlink)"
-  mlog DEBUG "Compilation Command=$FULL_CMD"
-  mlog VERBOSE "Compilation Command=$FULL_CMD"
+  mlog DEBUG "Compilation Command=${FULL_CMD[*]}"
+  mlog VERBOSE "Compilation Command=${FULL_CMD[*]}"
   [[ -n "$out" ]] && mlog DEBUG "$out"
 
   stripit "bin/${APP_NAME}-dynlink"
 else
-  mlog ERROR "Failed to build ${APP_NAME}-dynlink\nCompilation Command=$FULL_CMD\n$out"
+  mlog ERROR "Failed to build ${APP_NAME}-dynlink\nCompilation Command=${FULL_CMD[*]}\n$out"
 fi

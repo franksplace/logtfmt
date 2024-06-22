@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-#shellcheck disable=SC2317,SC2120
+# shellcheck disable=SC2317,SC2120
 
 ###########################
 # General Variables
@@ -7,10 +7,12 @@
 [[ -n "$BUILD_DEBUG" ]] && set -x
 trap "set +x" HUP INT QUIT TERM EXIT
 
-declare -g -x GCC_MIN_VER=8
-declare -g -x GCC_VENDOR='' # if we want to at some future date require GNU set it like the CPP_VENDOR
+declare -g -x C_MIN_VER=8
+declare -g -x C_VENDOR='' # if we want to at some future date require GNU set it like the C_VENDOR
+declare -g -x C_APP_SEARCH='cc clang clang-18 gcc gcc-14 gcc-15'
 declare -g -x CPP_MIN_VER=14
-declare -g -x CPP_VENDOR='Free Software Foundation'
+declare -g -x CPP_VENDOR='Free Software Foundation' # i.e. GNU C++
+declare -g -x CPP_APP_SEARCH="c++ c++${CPP_MIN_VER} c++14 c++-14 c++15 c++-15"
 declare -g -x SWIFT_MIN_VER=5.10
 
 declare -g -x DATELOG=true
@@ -25,7 +27,7 @@ APP_NAME="$(basename "$BASEDIR")"
 ###########################
 # Functions
 ###########################
-declare -g -f LOGTFMT bcheck color mlog cecho signit gccVerCheck
+declare -g -f LOGTFMT bcheck color mlog cecho signit cVerCheck
 declare -g -f c++VerCheck swiftVerCheck stripit compareSemanticVersions
 
 # little function to mimic boolean checks if user did not properly set 0/false or 1/true
@@ -167,10 +169,9 @@ function signit() {
     return 1
   fi
 
-  declare -a FULL_CMD=()
   declare -x out=''
-
-  local FULL_CMD=(codesign -f --sign "$CODE_SIGNATURE" --options=runtime --timestamp "$APP")
+  declare -a FULL_CMD=()
+  FULL_CMD=(codesign -f --sign "$CODE_SIGNATURE" --options=runtime --timestamp "$APP")
 
   mlog VERBOSE "Code Sign Command:${FULL_CMD[*]}"
   mlog DEBUG "Code Sign Command:${FULL_CMD[*]}"
@@ -212,9 +213,9 @@ function compareSemanticVersions() {
 
   local IFS=.
   # Everything after the first character not in [^0-9.] is compared
-  #shellcheck disable=SC2206
+  # shellcheck disable=SC2206
   local i a=(${1%%[^0-9.]*}) b=(${2%%[^0-9.]*})
-  #shellcheck disable=SC2295
+  # shellcheck disable=SC2295
   local arem=${1#${1%%[^0-9.]*}} brem=${2#${2%%[^0-9.]*}}
   for ((i = 0; i < ${#a[@]} || i < ${#b[@]}; i++)); do
     if ((10#${a[i]:-0} < 10#${b[i]:-0})); then
@@ -234,7 +235,7 @@ function compareSemanticVersions() {
 function swiftVerCheck() {
   declare -g SWIFT_CMD=''
   declare x='' y='' swift_ver=''
-  for x in $(type -afp swift); do
+  for x in $(type -afp swift 2>/dev/null); do
     swift_ver="$(for y in $($x --version 2>/dev/null); do [[ "$y" =~ ^\(swift ]] && cut -d- -f2 <<<"$y" && break; done 2>&1)"
     if [ -n "$swift_ver" ] && [[ $swift_ver =~ ^-?[0-9.\-]+$ ]]; then
       compareSemanticVersions "$swift_ver" "$SWIFT_MIN_VER"
@@ -252,19 +253,25 @@ function swiftVerCheck() {
   mlog VERBOSE "Swift version:$swift_ver"
 }
 
-function gccVerCheck() {
+function cVerCheck() {
   declare -g C_CMD=''
-  declare x='' gcc_ver=''
-  for x in $(type -afp gcc gcc-14 gcc-15); do
-    if [ -n "$GCC_VENDOR" ]; then
-      if ! $x --version 2>/dev/null | grep "$GCC_VENDOR" >/dev/null 2>&1; then
+  declare x='' c_ver='' c_dist=''
+
+  # shellcheck disable=SC2086
+  for x in $(type -afp ${C_APP_SEARCH} 2>/dev/null); do
+    if ! c_dist=$($x --version 2>/dev/null) && [ -n "$C_VENDOR" ]; then
+      continue
+    fi
+
+    if [ -n "$C_VENDOR" ]; then
+      if [[ ! "$c_dist" =~ $C_VENDOR ]]; then
         continue
       fi
     fi
 
-    gcc_ver=$($x -dumpversion 2>/dev/null | cut -d. -f1)
-    if [ -n "$gcc_ver" ] && [[ $gcc_ver =~ ^-?[0-9.\-]+$ ]]; then
-      compareSemanticVersions "$gcc_ver" "$GCC_MIN_VER"
+    c_ver=$($x -dumpversion 2>/dev/null | cut -d. -f1)
+    if [ -n "$c_ver" ] && [[ $c_ver =~ ^-?[0-9.\-]+$ ]]; then
+      compareSemanticVersions "$c_ver" "$C_MIN_VER"
       if [ $? -le 1 ]; then
         C_CMD="$x"
         break
@@ -272,19 +279,28 @@ function gccVerCheck() {
     fi
   done
   if [ -z "$C_CMD" ]; then
-    mlog FATAL "$GCC_VENDOR gcc rev ${GCC_MIN_VER}+ is not installed (or not found in PATH)" 1
+    mlog FATAL "$C_VENDOR c rev ${C_MIN_VER}+ is not installed (or not found in PATH)" 1
   fi
-  mlog DEBUG "GCC command:$C_CMD"
-  mlog VERBOSE "GCC command:$C_CMD"
-  mlog VERBOSE "GCC version:$gcc_ver"
+  mlog DEBUG "C command:$C_CMD"
+  mlog DEBUG "C version:$c_ver"
+  mlog DEBUG "C vendor: $c_dist"
+  mlog VERBOSE "C command:$C_CMD"
+  mlog VERBOSE "C version:$c_ver"
+  mlog VERBOSE "C vendor: $c_dist"
 }
 
 function c++VerCheck() {
   declare -g CC_CMD=''
-  declare x='' cpp_ver=''
-  for x in $(type -afp c++ c++${CPP_MIN_VER} c++14 c++-14 c++15 c++-15 2>/dev/null >&1); do
+  declare x='' cpp_ver='' cpp_dist=''
+
+  # shellcheck disable=SC2086
+  for x in $(type -afp ${CPP_APP_SEARCH} 2>/dev/null); do
+    if ! cpp_dist=$($x --version 2>/dev/null) && [ -n "$CPP_VENDOR" ]; then
+      continue
+    fi
+
     if [ -n "$CPP_VENDOR" ]; then
-      if ! $x --version 2>/dev/null | grep "$CPP_VENDOR" >/dev/null 2>&1; then
+      if [[ ! "$cpp_dist" =~ $CPP_VENDOR ]]; then
         continue
       fi
     fi
@@ -302,8 +318,12 @@ function c++VerCheck() {
     mlog FATAL "$CPP_VENDOR C++ ver ${CPP_MIN_VER}+ is not installed (or not found in PATH)" 1
   fi
   mlog DEBUG "C++ command:$CC_CMD"
-  mlog DEBUG "C++ command:$CC_CMD"
+  mlog DEBUG "C++ version:$cpp_ver"
+  mlog DEBUG "C++ vendor:$cpp_dist"
+
+  mlog VERBOSE "C++ command:$CC_CMD"
   mlog VERBOSE "C++ version:$cpp_ver"
+  mlog VERBOSE "C++ vendor:$cpp_dist"
 }
 
 function stripit() {
@@ -337,7 +357,7 @@ export -f color
 export -f cecho
 export -f signit
 export -f LOGTFMT
-export -f gccVerCheck
+export -f cVerCheck
 export -f c++VerCheck
 export -f swiftVerCheck
 export -f stripit
@@ -354,7 +374,7 @@ if bcheck DEBUG; then
   mlog DEBUG "APP_NAME=$APP_NAME"
 fi
 
-#shellcheck disable=SC2038
+# shellcheck disable=SC2038
 B_OPTS=("$(cd "$BASEDIR" && find . -mindepth 2 -maxdepth 2 -name build.sh -exec dirname {} \; 2>/dev/null | xargs -I{} basename '{}')")
 if [ -z "$1" ]; then
   echo "Valid build targets are "
@@ -366,7 +386,7 @@ if [ -z "$1" ]; then
 fi
 
 if [ "${1^^}" == "ALL" ]; then
-  #shellcheck disable=SC2068
+  # shellcheck disable=SC2068
   set -- ${B_OPTS[@]}
 fi
 

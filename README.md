@@ -3,28 +3,29 @@
 Little set of executables to print out [ISO8601 w/Combined Date & Time](https://en.wikipedia.org/wiki/ISO_8601#Combined_date_and_time_representations "WikiPedia - ISO 8601 with Combined Date & Time") with microseconds based on clients local timezone.
 (i.e. 2024-05-29T14:19:12.131126-0700)
 
-This is similar to Bash and Zsz's EPOCH REALTIME
+This is similar to EPOCH Realtime in Bash and Zsh.
 
-```ZSH >= 5.6
-print -rP "%D{%FT%T.%6.%z}"
-```
-
-```Bash >= 5.0
+Bash >= 5.0
+```sh
 t=$EPOCHREALTIME
 printf "%(%FT%T)T.${t#*.}%(%z)T\n" "${t%.*}"
+```
+ZSH >= 5.6
+```sh
+print -rP "%D{%FT%T.%6.%z}"
 ```
 
 ## Executables
 
 Executable|Language|Version
 :---:|:---:|:---:
-cdate | C | Clang or GCC 8+
+cdate | C | GCC 8+
 ccdate | C++ | Clang or GCC 14+
 sdate | Swift | 5.10+
 
 ## Building
 
-```Bash >= 5.0 or Zsh >= 5.6
+```sh
     git clone https://github.com/franksplace/logtfmt/
     cd logtfmt
     ./build.sh all
@@ -32,7 +33,7 @@ sdate | Swift | 5.10+
 
 ## Running
 
-```Shell
+```sh
 cd logtfmt
 ./bin/cdate
 ./bin/sdate
@@ -41,7 +42,7 @@ cd logtfmt
 
 ### Example
 
-```Shell
+```sh
 cd logtfmt
 bin/cdate
 2024-05-29T14:19:12.131126-0700
@@ -51,7 +52,7 @@ bin/cdate
 
 You'll need to install [https://github.com/sharkdp/hyperfine] first.
 
-```Zsh >= 5.6
+```sh
 cd logtfmt
 ./benchmark.zsh
 ```
