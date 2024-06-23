@@ -40,7 +40,7 @@ declare -a FULL_CMD=()
 FULL_CMD=("$CC_CMD" "${BOPTS[@]}" -std=c++20 -o "bin/${APP_NAME}" -Wall -pedantic "${BASEDIR}/$APP_NAME".cc)
 # shellcheck disable=SC2068
 if out=$(${FULL_CMD[@]} 2>&1); then
-  mlog SUCCESS "Successfully build $APP_NAME (binary installed at bin/$APP_NAME)"
+  mlog SUCCESS "Successfully built $APP_NAME (binary installed at bin/$APP_NAME)"
   mlog DEBUG "Compilation Command=${FULL_CMD[*]}"
   mlog VERBOSE "Compilation Command=${FULL_CMD[*]}"
   [[ -n "$out" ]] && mlog DEBUG "$out"
@@ -60,7 +60,7 @@ bcheck DEBUG && BOPTS+=("-v")
 FULL_CMD=("$CC_CMD" "${BOPTS[@]}" -std=c++20 -o "bin/${APP_NAME}-dynlink" -Wall -pedantic "${BASEDIR}/$APP_NAME".cc)
 # shellcheck disable=SC2068
 if out=$(${FULL_CMD[@]} 2>&1); then
-  mlog SUCCESS "Successfully build ${APP_NAME}-dynlink (binary installed at bin/${APP_NAME}-dynlink)"
+  mlog SUCCESS "Successfully built ${APP_NAME}-dynlink (binary installed at bin/${APP_NAME}-dynlink)"
   mlog DEBUG "Compilation Command=${FULL_CMD[*]}"
   mlog VERBOSE "Compilation Command=${FULL_CMD[*]}"
   [[ -n "$out" ]] && mlog DEBUG "$out"
