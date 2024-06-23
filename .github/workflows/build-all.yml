@@ -1,8 +1,8 @@
-name: GitHub Actions Demo
-run-name: ${{ github.actor }} is testing out GitHub Actions 🚀
+name: Build All
+run-name: ${{ github.actor }} Build All 🚀
 on: [push]
 jobs:
-  Explore-GitHub-Actions:
+  Build-All:
     runs-on: ubuntu-latest
     steps:
       - run: echo "🎉 The job was automatically triggered by a ${{ github.event_name }} event."
@@ -12,7 +12,7 @@ jobs:
         uses: actions/checkout@v4
       - run: echo "💡 The ${{ github.repository }} repository has been cloned to the runner."
       - run: echo "🖥️ The workflow is now ready to test your code on the runner."
-      - name: Test Build
+      - name: Running Build
         run: |
-          ./build.sh all
+          DEBUG=true ./build.sh all
       - run: echo "🍏 This job's status is ${{ job.status }}."
