@@ -59,6 +59,13 @@ You'll need to install [Hyperfine](https://github.com/sharkdp/hyperfine) first.
 cd logtfmt
 ./benchmark.zsh
 ```
+### Benchmark Output Example
+
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="https://github.com/franksplace/logtfmt/blob/main/docs/logtfmt-benchmark-example-github-dark-theme.jpg">
+  <source media="(prefers-color-scheme: light)" srcset="https://github.com/franksplace/logtfmt/blob/main/docs/logtfmt-benchmark-example-github-light-theme.jpg">
+  <img alt="Benchmark Output Example" src="https://github.com/franksplace/logtfmt/blob/main/docs/logtfmt-benchmark-example-github-light-theme.jpg" width="640>
+</picture>
 
 ## License
 
