@@ -333,7 +333,11 @@ function stripit() {
   [[ -z "$FILE" ]] && mlog ERROR "stripit function requries a file" && return 1
   [[ ! -r "$FILE" ]] && mlog ERROR "stripit function requires a file to readable " && return 1
 
-  bcheck DEBUG && mlog DEBUG "We don't strip when DEBUG mode is enabled" && return 0 # we don't strip on debug binaries
+  # we don't strip on debug binaries
+  if bcheck DEBUG; then
+    mlog DEBUG "We don't strip when DEBUG mode is enabled"
+    return 0
+  fi
 
   if [ "$(uname)" == "Darwin" ]; then
     STRIP_CMD="strip -x -S -D -no_code_signature_warning ${FILE}"
