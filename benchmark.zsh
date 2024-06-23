@@ -39,7 +39,7 @@ HYPERFINE_CMD=(hyperfine -i -N \
 ${HYPERFINE_CMD[*]} 2>/dev/null
 
 echo
-printf "%s\n" "General Output for each Benchmarked Commands"
+printf "%s\n" "General output for each logtfmt command"
 printf "%-15s %-20s %s\n" "Cmd" "File Size" "Cmd Output"
 printf "%-15s %-20s " "Bash"  "$(whence -c bash | xargs -I {} ls -lLk {} | awk '{print $5}')kb" 
 bash -c 't=$EPOCHREALTIME; printf "%(%FT%T)T.${t#*.}%(%z)T\n" "${t%.*}"'
