@@ -31,9 +31,11 @@ HYPERFINE_CMD=(hyperfine -i -N \
 
 [[ -x "bin/sdate"  ]] && HYPERFINE_CMD+=(-n "Swift - sdate" bin/sdate)
 [[ -x "bin/cdate"  ]] && HYPERFINE_CMD+=(-n "C     - cdate" bin/cdate)
-[[ -x "bin/cdate-dynlink" ]] && HYPERFINE_CMD+=(-n "C     - cdate-dynlink" bin/cdate-dynlink)
-[[ -x "bin/ccdate"  ]] && HYPERFINE_CMD+=(-n "C++   - ccdate" bin/ccdate)
-[[ -x "bin/ccdate-dynlink"  ]] && HYPERFINE_CMD+=(-n "C++   - ccdate-dynlink" bin/ccdate-dynlink)
+[[ -x "bin/cdate-dynlink" ]]  && HYPERFINE_CMD+=(-n "C     - cdate-dynlink" bin/cdate-dynlink)
+[[ -x "bin/ccdate" ]] && HYPERFINE_CMD+=(-n "C++   - ccdate" bin/ccdate)
+[[ -x "bin/ccdate-dynlink" ]] && HYPERFINE_CMD+=(-n "C++   - ccdate-dynlink" bin/ccdate-dynlink)
+[[ -x "bin/pldate"  ]] && HYPERFINE_CMD+=(-n "Compiled Perl - pldate" bin/pldate)
+[[ -x "bin/pydate"  ]] && HYPERFINE_CMD+=(-n "Compiled Python - pydate" bin/pydate)
 
 
 ${HYPERFINE_CMD[*]} 2>/dev/null
@@ -74,5 +76,17 @@ if [ -x "bin/ccdate-dynlink" ] ; then
   printf "%-15s %-20s " "ccdate-dynlink" "$(ls -lLk bin/ccdate-dynlink | awk '{print $5}')kb" 
   bin/ccdate-dynlink
 fi
+
+
+if [ -x "bin/pldate" ] ; then
+  printf "%-15s %-20s " "pldate" "$(ls -lLk bin/pldate | awk '{print $5}')kb" 
+  bin/pldate
+fi
+
+if [ -x "bin/pydate" ] ; then
+  printf "%-15s %-20s " "pydate" "$(ls -lLk bin/pydate | awk '{print $5}')kb" 
+  bin/pydate
+fi
+
 
 
