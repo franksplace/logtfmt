@@ -14,6 +14,9 @@ declare -g -x CPP_MIN_VER=14
 declare -g -x CPP_VENDOR='Free Software Foundation' # i.e. GNU C++
 declare -g -x CPP_APP_SEARCH="c++ c++${CPP_MIN_VER} c++14 c++-14 c++15 c++-15"
 declare -g -x SWIFT_MIN_VER=5.10
+declare -g -x GO_VENDOR='' # if we want to at some future date require a sepcific go compiler
+declare -g -x GO_APP_SEARCH=go
+declare -g -x GO_MIN_VER=1.20
 
 declare -g -x DATELOG=true
 # shellcheck disable=SC2164
@@ -29,6 +32,7 @@ APP_NAME="$(basename "$BASEDIR")"
 ###########################
 declare -g -f LOGTFMT bcheck color mlog cecho signit cVerCheck
 declare -g -f c++VerCheck swiftVerCheck stripit compareSemanticVersions
+declare -g -f goVerCheck
 
 # little function to mimic boolean checks if user did not properly set 0/false or 1/true
 function bcheck() {
@@ -326,6 +330,48 @@ function c++VerCheck() {
   mlog VERBOSE "C++ vendor:$cpp_dist"
 }
 
+function goVerCheck() {
+  declare -g GO_CMD=''
+  declare x='' go_ver='' go_dist=''
+
+  # shellcheck disable=SC2086
+  for x in $(type -afp ${GO_APP_SEARCH} 2>/dev/null); do
+    if ! go_dist=$($x version 2>/dev/null) && [ -n "$GO_VENDOR" ]; then
+      continue
+    fi
+
+    if [ -n "$GO_VENDOR" ]; then
+      if [[ ! "$go_dist" =~ $GO_VENDOR ]]; then
+        continue
+      fi
+    fi
+
+    go_ver=$($x version 2>/dev/null | cut -d' ' -f3 | sed -e 's/go//g')
+    # mlog VERBOSE "$x is go ver $go_ver"
+    if [ -n "$go_ver" ] && [[ $go_ver =~ ^[0-9.]+$ ]]; then
+      compareSemanticVersions "$go_ver" "$GO_MIN_VER"
+      if [ $? -le 1 ]; then
+        GO_CMD="$x"
+        break
+      fi
+    fi
+  done
+  if [ -z "$GO_CMD" ]; then
+    if [ -n "$GO_VENDOR" ]; then
+      mlog FATAL "$GO_VENDOR go ver ${GO_MIN_VER}+ is not installed (or not found in PATH)" 1
+    else
+      mlog FATAL "go ver ${GO_MIN_VER}+ is not installed (or not found in PATH)" 1
+    fi
+  fi
+  mlog DEBUG "go command:$GO_CMD"
+  mlog DEBUG "go version:$go_ver"
+  mlog DEBUG "go vendor:$go_dist"
+
+  mlog VERBOSE "go command:$GO_CMD"
+  mlog VERBOSE "go version:$go_ver"
+  mlog VERBOSE "go vendor:$go_dist"
+}
+
 function stripit() {
   local FILE=$1
   local STRIP_CMD='' out=''
@@ -364,6 +410,7 @@ export -f LOGTFMT
 export -f cVerCheck
 export -f c++VerCheck
 export -f swiftVerCheck
+export -f goVerCheck
 export -f stripit
 export -f compareSemanticVersions
 ###########################
