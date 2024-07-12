@@ -28,7 +28,7 @@ if [ ! -d "bin" ]; then
 fi
 
 declare -a BOPTS=()
-BOPTS=("-Ofast -DNDEBUG")
+BOPTS=('-ldflags="-w -s"')
 bcheck DEBUG && BOPTS=("-v")
 
 if [ "$(uname)" == "Linux" ]; then
@@ -36,14 +36,16 @@ if [ "$(uname)" == "Linux" ]; then
 fi
 
 declare -a FULL_CMD=()
-FULL_CMD=("$GO_CMD" build -C "$BASEDIR" -o "../bin/${APP_NAME}" "${BOPTS[*]}" godate.go)
-
-# shellcheck disable=SC2068
-if ! out="$(${FULL_CMD[@]} 2>&1)"; then
+FULL_CMD=("$GO_CMD" build -C "$BASEDIR" "${BOPTS[*]}" -o "../bin/${APP_NAME}" godate.go)
+declare FINAL_CMD="eval ${FULL_CMD[*]}"
+if ! out="$(${FINAL_CMD} 2>&1)"; then
   mlog FATAL "Unable to build $APP_NAME\nComplication Command=${FULL_CMD[*]}\n$out" 1
 fi
 
+# shellcheck disable=SC2068
 mlog DEBUG "Compilation Command=${FULL_CMD[*]}"
 mlog VERBOSE "Compilation Command=${FULL_CMD[*]}"
 [[ -n "$out" ]] && mlog DEBUG "$out"
 mlog SUCCESS "Successfully built $APP_NAME (binary installed at bin/${APP_NAME})"
+
+stripit "bin/${APP_NAME}"
