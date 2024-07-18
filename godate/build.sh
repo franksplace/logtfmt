@@ -32,7 +32,7 @@ BOPTS=('-ldflags="-w -s"')
 bcheck DEBUG && BOPTS=("-v")
 
 if [ "$(uname)" == "Linux" ]; then
-  BOPTS+=("-static -static-libgcc -static-libstdc++")
+  BOPTS=('-ldflags="-w -s -static -static-libgcc -static-libstdc++"')
 fi
 
 declare -a FULL_CMD=()

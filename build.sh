@@ -16,7 +16,7 @@ declare -g -x CPP_APP_SEARCH="c++ c++${CPP_MIN_VER} c++14 c++-14 c++15 c++-15"
 declare -g -x SWIFT_MIN_VER=5.10
 declare -g -x GO_VENDOR='' # if we want to at some future date require a sepcific go compiler
 declare -g -x GO_APP_SEARCH=go
-declare -g -x GO_MIN_VER=1.20
+declare -g -x GO_MIN_VER=1.22
 
 declare -g -x DATELOG=true
 # shellcheck disable=SC2164
