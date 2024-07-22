@@ -377,7 +377,7 @@ function stripit() {
   local STRIP_CMD='' out=''
 
   [[ -z "$FILE" ]] && mlog ERROR "stripit function requries a file" && return 1
-  [[ ! -r "$FILE" ]] && mlog ERROR "stripit function requires a file to readable " && return 1
+  [[ ! -r "$FILE" ]] && mlog ERROR "stripit function requires a file to be readable " && return 1
 
   # we don't strip on debug binaries
   if bcheck DEBUG; then
