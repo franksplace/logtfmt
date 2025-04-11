@@ -15,10 +15,12 @@ jobs:
         run: |
           sudo add-apt-repository -y universe
           sudo apt-get -qqy update
-          sudo apt-get -qqy install libpar-packer-perl gcc-14
+          sudo apt-get -qqy install libpar-packer-perl gcc-14 g++-14
           sudo ln -snf /usr/bin/gcc-14 /usr/bin/gcc
-          echo "GCC Version is ..."
-          gcc --version
+          sudo ln -snf /usr/bin/g++-14 /usr/bin/g++
+          sudo ln -snf /usr/bin/g++ /usr/bin/c++
+          echo "c++ version is ..."
+          c++ --version
       - run: echo "🖥️ The workflow is now ready to test your code on the runner."
       - name: Running Build
         run: |
