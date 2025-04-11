@@ -3,6 +3,8 @@
 Little set of executables to print out [ISO8601 w/Combined Date & Time](https://en.wikipedia.org/wiki/ISO_8601#Combined_date_and_time_representations "WikiPedia - ISO 8601 with Combined Date & Time") with microseconds based on clients local timezone.
 (i.e. 2024-05-29T14:19:12.131126-0700)
 
+The main purpose is to compare execution times betweeh different languages and understand uniqueness between how each handle "localtime".
+
 This is similar to EPOCH Realtime in Bash and Zsh.
 
 Bash >= 5.0
