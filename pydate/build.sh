@@ -50,3 +50,4 @@ if ! rm -f "${APP_NAME}/pydate.c"; then
 fi
 
 mlog SUCCESS "Successfully built ${APP_NAME} (binary installed at bin/${APP_NAME})"
+exit 0

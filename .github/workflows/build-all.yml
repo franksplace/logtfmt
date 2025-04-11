@@ -15,12 +15,42 @@ jobs:
         run: |
           sudo add-apt-repository -y universe
           sudo apt-get -qqy update
-          sudo apt-get -qqy install libpar-packer-perl gcc-14 g++-14
+          sudo apt-get -qqy install libpar-packer-perl \
+          binutils \
+          curl \
+          gcc-14 \
+          g++-14 \
+          git \
+          gnupg2 \
+          golang \
+          jq \
+          libc6-dev \
+          libcurl4-openssl-dev \
+          libedit2 \
+          libgcc-13-dev \
+          libncurses-dev \
+          libpython3-dev \
+          libsqlite3-0 \
+          libstdc++-13-dev \
+          libxml2-dev \
+          libz3-dev \
+          pkg-config \
+          tzdata \
+          unzip \
+          zlib1g-dev
           sudo ln -snf /usr/bin/gcc-14 /usr/bin/gcc
           sudo ln -snf /usr/bin/g++-14 /usr/bin/g++
           sudo ln -snf /usr/bin/g++ /usr/bin/c++
           echo "c++ version is ..."
           c++ --version
+          echo "Installing Swift"
+          curl -O https://download.swift.org/swiftly/linux/swiftly-$(uname -m).tar.gz && \
+          tar zxf swiftly-$(uname -m).tar.gz && \
+          sudo ./swiftly init –assume-yes --quiet-shell-followup && \
+          sudo . ~/.local/share/swiftly/env.sh && \
+          sudo hash -r
+
+
       - run: echo "🖥️ The workflow is now ready to test your code on the runner."
       - name: Running Build
         run: |

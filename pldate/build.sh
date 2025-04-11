@@ -14,12 +14,11 @@ ABSPATH="$(
 BASEDIR="$(dirname "$ABSPATH")"
 APP_NAME="$(basename "$BASEDIR")"
 
-
 if ! declare -f mlog >/dev/null 2>&1; then
   source "$BASEDIR/../build.sh"
 fi
 
-if ! type -a pp >/dev/null 2>&1 ; then
+if ! type -a pp >/dev/null 2>&1; then
   mlog FATAL "PAR::Packer (pp) not installed" 1
 fi
 
@@ -30,9 +29,9 @@ if [ ! -d "bin" ]; then
   fi
 fi
 
-
 if ! pp -o "bin/${APP_NAME}" "${BASEDIR}/pdate".pl; then
   mlog FATAL "Unable to build $APP_NAME" 1
 fi
 
 mlog SUCCESS "Successfully built $APP_NAME (binary installed at bin/${APP_NAME})"
+exit 0

@@ -128,7 +128,7 @@ if [ "$(uname)" != "Darwin" ]; then
   mlog "INFO" "Code sign automation only completed for Darwin (MacOS), manual operation is needed"
   mlog "INFO" "Manual Operation -> 'cargo install apple-codesign --locked' ; rcodesign and Transporter"
   mlog "INFO" "Good Explanation -> https://gregoryszorc.com/docs/apple-codesign/0.12.0/apple_codesign_getting_started.html#installing"
-  exit
+  exit 0
 fi
 
 signit "$APP_BIN"
