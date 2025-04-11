@@ -8,15 +8,14 @@ jobs:
       - run: echo "🎉 The job was automatically triggered by a ${{ github.event_name }} event."
       - run: echo "🐧 This job is now running on a ${{ runner.os }} server hosted by GitHub!"
       - run: echo "🔎 The name of your branch is ${{ github.ref }} and your repository is ${{ github.repository }}."
-      - name: Check out repository code
+      - name: Checking out repository code
         uses: actions/checkout@v4
       - run: echo "💡 The ${{ github.repository }} repository has been cloned to the runner."
-      - name: Installing prerequisites packages
+      - name: Installing prerequisite packages
         run: |
-          sudo apt-get -qqy update
-          sudo apt-get -qqy install libpar-packer-perl
           sudo add-apt-repository -y universe
-          sudo apt-get -qqy install gcc-14
+          sudo apt-get -qqy update
+          sudo apt-get -qqy install libpar-packer-perl gcc-14
       - run: echo "🖥️ The workflow is now ready to test your code on the runner."
       - name: Running Build
         run: |
