@@ -1,0 +1,62 @@
+name: Build All
+run-name: ${{ github.actor }} Build All 🚀
+on: [push]
+jobs:
+  Build-All:
+    runs-on: ubuntu-latest
+    steps:
+      - run: echo "🎉 The job was automatically triggered by a ${{ github.event_name }} event."
+      - run: echo "🐧 This job is now running on a ${{ runner.os }} server hosted by GitHub!"
+      - run: echo "🔎 The name of your branch is ${{ github.ref }} and your repository is ${{ github.repository }}."
+      - name: Checking out repository code
+        uses: actions/checkout@v4
+      - run: echo "💡 The ${{ github.repository }} repository has been cloned to the runner."
+      - name: Installing prerequisite packages
+        run: |
+          sudo add-apt-repository -y universe
+          sudo apt-get -qqy update
+          sudo apt-get -qqy install \
+          binutils \
+          curl \
+          gcc-14 \
+          g++-14 \
+          git \
+          gnupg2 \
+          golang \
+          hyperfine \
+          jq \
+          libc6-dev \
+          libcurl4-openssl-dev \
+          libedit2 \
+          libgcc-13-dev \
+          libncurses-dev \
+          libpar-packer-perl \
+          libpython3-dev \
+          libsqlite3-0 \
+          libstdc++-13-dev \
+          libxml2-dev \
+          libz3-dev \
+          pkg-config \
+          tzdata \
+          unzip \
+          zlib1g-dev \
+          zsh
+          sudo ln -snf /usr/bin/gcc-14 /usr/bin/gcc
+          sudo ln -snf /usr/bin/g++-14 /usr/bin/g++
+          sudo ln -snf /usr/bin/g++ /usr/bin/c++
+          echo "c++ version is ..."
+          c++ --version
+          echo "Installing Swift"
+          curl -O https://download.swift.org/swiftly/linux/swiftly-$(uname -m).tar.gz
+          tar zxf swiftly-$(uname -m).tar.gz
+          ./swiftly init --quiet-shell-followup --assume-yes
+          . ~/.local/share/swiftly/env.sh
+          hash -r
+      - run: echo "🖥️ The workflow is now ready to test your code on the runner."
+      - name: Running Build
+        run: |
+          DEBUG=true VERBOSE=true ./build.sh all
+      - run: echo "🍏 This job's status is ${{ job.status }}."
+      - name: Running benchmark
+        run: |
+          ./benchmark.zsh
