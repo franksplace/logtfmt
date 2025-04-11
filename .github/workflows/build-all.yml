@@ -48,7 +48,7 @@ jobs:
           echo "Installing Swift"
           curl -O https://download.swift.org/swiftly/linux/swiftly-$(uname -m).tar.gz
           tar zxf swiftly-$(uname -m).tar.gz
-          sudo ./swiftly init --quiet-shell-followup --assume-yes
+          ./swiftly init --quiet-shell-followup --assume-yes
           . ~/.local/share/swiftly/env.sh
           hash -r
       - run: echo "🖥️ The workflow is now ready to test your code on the runner."
