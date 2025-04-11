@@ -39,7 +39,8 @@ jobs:
           pkg-config \
           tzdata \
           unzip \
-          zlib1g-dev
+          zlib1g-dev \
+          zsh
           sudo ln -snf /usr/bin/gcc-14 /usr/bin/gcc
           sudo ln -snf /usr/bin/g++-14 /usr/bin/g++
           sudo ln -snf /usr/bin/g++ /usr/bin/c++
