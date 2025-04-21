@@ -1,0 +1,18 @@
+.{
+    .name = .zdate,
+    .version = "0.0.1",
+    .fingerprint = 0xfe9ae71578c99fb7,
+    .minimum_zig_version = "0.14.0",
+    .dependencies = .{
+        .zdt = .{
+            .url = "git+https://github.com/FObersteiner/zdt",
+            // .url = "git+https://codeberg.org/FObersteiner/zdt#e5261db1379c4d70dbb6cd6fa3b39f4ed5883942",
+            .hash = "zdt-0.6.4-xr0_vH71EABFDm2Uqa8yRXku_EnNyVm43lEjDef2_Ka6",
+        },
+    },
+    .paths = .{
+        "build.zig",
+        "build.zig.zon",
+        "src",
+    },
+}
