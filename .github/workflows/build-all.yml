@@ -36,6 +36,7 @@ jobs:
           libstdc++-13-dev \
           libxml2-dev \
           libz3-dev \
+          manpages-posix-dev \
           pkg-config \
           tzdata \
           unzip \
