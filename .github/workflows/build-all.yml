@@ -55,7 +55,7 @@ jobs:
           echo "Installing anyzig"
           curl -s https://api.github.com/repos/marler8997/anyzig/releases/latest | grep "browser_download_url.*$(uname -m)-linux"  | cut -d: -f2,3 | tr -d \" | xargs curl -s -L -o anyzig.tgz -O
           tar zxf anyzig.tgz
-          cp ./zig /usr/bin
+          sudo cp ./zig /usr/bin
       - run: echo "🖥️ The workflow is now ready to test your code on the runner."
       - name: Running Build
         run: |
