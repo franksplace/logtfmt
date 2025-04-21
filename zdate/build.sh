@@ -30,7 +30,8 @@ fi
 cd "$BASEDIR" || mlog ERROR "Unable to change to $BASEDIR" 1
 
 declare -a FULL_CMD=()
-FULL_CMD=("zig" "build" "--fetch")
+FULL_CMD=("zig" "fetch" "--save" "git+https://github.com/FObersteiner/zdt")
+# shellcheck disable=SC2068
 if out=$(${FULL_CMD[@]} 2>&1); then
   mlog SUCCESS "Successfully fetched zdt module with zig "
   mlog DEBUG "zig Command=${FULL_CMD[*]}"
@@ -54,6 +55,7 @@ else
 fi
 
 FULL_CMD=("diff" "-q" "$BASEDIR/bin/$APP_NAME" "$APP_BIN")
+# shellcheck disable=SC2068
 if out=$(${FULL_CMD[@]} 2>&1); then
   mlog VERBOSE "diff Command=${FULL_CMD[*]}"
   mlog "VERBOSE" "freshly built $APP_BIN is identical to final binary directory, no copy operation need"
