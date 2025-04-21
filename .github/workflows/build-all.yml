@@ -51,6 +51,9 @@ jobs:
           tar zxf swiftly-$(uname -m).tar.gz
           ./swiftly init --quiet-shell-followup --assume-yes
           . ~/.local/share/swiftly/env.sh
+          curl -s https://api.github.com/repos/marler8997/zigup/releases/latest | grep "browser_download_url.*linux" | grep "$(uname -m)"  | cut -d: -f2,3 | tr -d \"  | curl -s -O zigup.tar.gz
+          tar zxf zigup.tar.gz
+          ./zigup master
           hash -r
       - run: echo "🖥️ The workflow is now ready to test your code on the runner."
       - name: Running Build
