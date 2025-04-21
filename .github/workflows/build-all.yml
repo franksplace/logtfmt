@@ -52,11 +52,10 @@ jobs:
           ./swiftly init --quiet-shell-followup --assume-yes
           . ~/.local/share/swiftly/env.sh
           hash -r
-          echo "Fetching zigup"
-          curl -s https://api.github.com/repos/marler8997/zigup/releases/latest | grep "browser_download_url.*linux" | grep "$(uname -m)"  | cut -d: -f2,3 | tr -d \"  | xargs curl -s -L -o zigup.tar.gz -O
-          tar zxf zigup.tar.gz
-          echo "Install zig master"
-          ./zigup master
+          echo "Installing anyzig"
+          curl -s https://api.github.com/repos/marler8997/anyzig/releases/latest | grep "browser_download_url.*$(uname -m)-linux"  | cut -d: -f2,3 | tr -d \" | xargs curl -s -L -o anyzig.tgz -O
+          tar zxf anyzig.tgz
+          cp ./zig /usr/bin
       - run: echo "🖥️ The workflow is now ready to test your code on the runner."
       - name: Running Build
         run: |
