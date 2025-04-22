@@ -394,9 +394,11 @@ function stripit() {
   mlog VERBOSE "Strip command:$STRIP_CMD"
   if out="$($STRIP_CMD 2>&1)"; then
     mlog SUCCESS "Successfully stripped $FILE"
+    return 0
   else
     mlog ERROR "Failed to strip $FILE"
     [[ -n "$out" ]] && mlog ERROR "$out"
+    return 1
   fi
 }
 
