@@ -26,7 +26,11 @@ Executable|Language|Version
 :---:|:---:|:---:
 cdate | C | GCC 8+
 ccdate | C++ | Clang or GCC 14+
+godate | Go | 1.22+
+pldate | Compiled Perl | 5.34+
+pydate | Compiled Python | 3+
 sdate | Swift | 5.10+
+zdate | Zig | 0.14+
 
 ## Building
 
@@ -72,7 +76,7 @@ cd logtfmt
 ## License
 
 ```Text
-Copyright 2024 Frank Stutz.
+Copyright 2024-2025 Frank Stutz.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
