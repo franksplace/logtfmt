@@ -17,6 +17,7 @@ jobs:
           sudo apt-get -qqy update
           sudo apt-get -qqy install \
           binutils \
+          cython3 \
           curl \
           gcc-14 \
           g++-14 \

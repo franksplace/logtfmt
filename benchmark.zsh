@@ -39,6 +39,7 @@ HYPERFINE_CMD=(hyperfine -i -N \
 [[ -x "bin/godate"  ]] && HYPERFINE_CMD+=(-n "Go - godate" bin/godate)
 [[ -x "bin/zdate"  ]] && HYPERFINE_CMD+=(-n "Zig    - zdate" bin/zdate)
 [[ -x "bin/adate"  ]] && HYPERFINE_CMD+=(-n "Assembly -  adate" bin/adate)
+[[ -x "bin/adate-dynlink" ]] && HYPERFINE_CMD+=(-n "Assembly   - adate-dynlink" bin/ccdate-dynlink)
 
 
 ${HYPERFINE_CMD[*]} 2>/dev/null
@@ -80,7 +81,6 @@ if [ -x "bin/ccdate-dynlink" ] ; then
   bin/ccdate-dynlink
 fi
 
-
 if [ -x "bin/pldate" ] ; then
   printf "%-15s %-20s " "pldate" "$(ls -lLk bin/pldate | awk '{print $5}')kb" 
   bin/pldate
@@ -106,4 +106,7 @@ if [ -x "bin/adate" ] ; then
   bin/adate
 fi
 
-
+if [ -x "bin/adate-dynlink" ] ; then
+  printf "%-15s %-20s " "adate-dynlink" "$(ls -lLk bin/adate-dynlink | awk '{print $5}')kb" 
+  bin/adate-dynlink
+fi

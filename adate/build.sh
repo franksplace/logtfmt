@@ -52,9 +52,10 @@ BOPTS=("-Ofast -DNDEBUG")
 bcheck DEBUG && BOPTS=("-v")
 
 if [ "$(uname -s)" == "Darwin" ]; then
+  BOPTS+=("-no-pie")
   ARCH_FLAG="machO64"
 elif [ "$(uname -s)" == "Linux" ]; then
-  BOPTS+=("-static -static-libgcc -static-libstdc++")
+  BOPTS+=("-static -static-libgcc -static-libstdc++ -no-pie")
   ARCH_FLAG="elf64"
 else
   mlog FATAL "Currently compilation supported on Darwin (MacOS) and Linux" 1
@@ -89,7 +90,7 @@ if [ -n "$ONLY_STATIC" ] || [ "$(uname)" == "Darwin" ]; then
   exit
 fi
 
-BOPTS=("-Ofast -s -DNDEBUG")
+BOPTS=("-Ofast -s -DNDEBUG -no-pie")
 bcheck DEBUG && BOPTS=("-v")
 
 FULL_CMD=("$C_CMD" "${BOPTS[@]}" -o "bin/${APP_NAME}-dynlink" -Wall "${BASEDIR}/$APP_NAME".o)

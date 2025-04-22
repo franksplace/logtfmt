@@ -1,5 +1,14 @@
-%ifidn __OUTPUT_FORMAT__,macho64
+; macOS/Linux compatible ISO 8601 datetime with microseconds and offset
+%ifidn __OUTPUT_FORMAT__, macho64
     %pragma macho64 platform macosx 14.4
+    %define SYM(x) _ %+ x
+    %define TM_GMT_OFF 40
+    %define EXIT_SYSCALL 0x2000001
+%else
+    %define SYM(x) x
+    %define TM_GMT_OFF 32
+    %define EXIT_SYSCALL 60
+    section .note.GNU-stack noalloc noexec nowrite progbits ; Linux only
 %endif
 
 section .data
@@ -8,73 +17,78 @@ section .data
 
 section .bss
     tv: resq 2
-    tm: resb 56         ; macOS struct tm size (56 bytes)
+    tm: resb 56      ; Size for both OS
     time_str: resb 20
 
 section .text
-    global _main
-    extern _gettimeofday
-    extern _localtime_r
-    extern _strftime
-    extern _printf
+    global SYM(main)
+    extern SYM(gettimeofday)
+    extern SYM(localtime_r)
+    extern SYM(strftime)
+    extern SYM(printf)
 
-_main:
+SYM(main):
+    %ifidn __OUTPUT_FORMAT__, macho64
     push rbp
     mov rbp, rsp
-    and rsp, -16        ; 16-byte stack alignment
+    and rsp, -16     ; macOS stack alignment
+    %endif
 
-    ; Get current time (seconds + microseconds)
+    ; Get time of day
     lea rdi, [rel tv]
     xor rsi, rsi
-    call _gettimeofday
+    call SYM(gettimeofday)
 
     ; Convert to local time
     lea rdi, [rel tv]
     lea rsi, [rel tm]
-    call _localtime_r
+    call SYM(localtime_r)
 
-    ; Format ISO 8601 base string
+    ; Format ISO string
     lea rdi, [rel time_str]
     mov rsi, 20
     lea rdx, [rel iso_fmt]
     lea rcx, [rel tm]
-    call _strftime
+    call SYM(strftime)
 
-    ; Calculate timezone offset (tm_gmtoff at offset 40)
-    mov rax, [rel tm + 40]  ; Load tm_gmtoff
-    mov rbx, '+'            ; Default sign
-    cmp rax, 0
-    jge .positive
-    mov rbx, '-'            ; Handle negative offset
-    neg rax                 ; Work with absolute value
+    ; Timezone offset calculation
+    mov rax, [rel tm + TM_GMT_OFF]
+    mov rbx, '+'     ; Default sign
+    test rax, rax
+    jns .positive
+    mov rbx, '-'     ; Negative offset
+    neg rax
 .positive:
-    ; Compute hours and remainder_seconds
+    ; Hours/minutes calculation
     xor rdx, rdx
     mov rcx, 3600
-    div rcx                 ; RAX = hours, RDX = remainder_seconds
-    mov r8, rax             ; Store hours
-    mov rsi, rdx            ; Store remainder_seconds
-
-    ; Compute minutes
-    mov rax, rsi
+    div rcx          ; rax=hours, rdx=remaining sec
+    mov r8, rax      ; store hours
+    mov rax, rdx
     xor rdx, rdx
     mov rcx, 60
-    div rcx                 ; RAX = minutes
+    div rcx          ; rax=minutes
 
-    ; Prepare printf arguments
+    ; Prepare printf args
     lea rdi, [rel output_fmt]
     lea rsi, [rel time_str]
-    mov rdx, [rel tv + 8]   ; Microseconds
-    movzx rcx, bl           ; Sign character
-    mov r9, rax             ; Minutes
+    mov rdx, [rel tv+8]  ; microseconds
+    movzx rcx, bl        ; sign
+    mov r9, rax          ; minutes
 
-    ; Print formatted datetime
-    call _printf
+    %ifidn __OUTPUT_FORMAT__, elf64
+    xor eax, eax        ; Linux varargs requirement
+    %endif
+    call SYM(printf)
 
     ; Clean exit
+    %ifidn __OUTPUT_FORMAT__, macho64
     mov rsp, rbp
     pop rbp
-    mov rax, 0x2000001      ; macOS exit syscall
-    xor rdi, rdi
+    mov rax, EXIT_SYSCALL
+    %else
+    mov eax, EXIT_SYSCALL
+    %endif
+    xor edi, edi
     syscall
 
