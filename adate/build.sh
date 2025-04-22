@@ -87,7 +87,7 @@ fi
 
 if [ -n "$ONLY_STATIC" ] || [ "$(uname)" == "Darwin" ]; then
   objectCleanup
-  exit
+  exit 0
 fi
 
 BOPTS=("-Ofast -s -DNDEBUG -no-pie")
@@ -107,3 +107,5 @@ else
 fi
 
 objectCleanup
+
+exit 0
