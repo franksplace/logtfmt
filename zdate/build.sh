@@ -30,6 +30,17 @@ fi
 cd "$BASEDIR" || mlog ERROR "Unable to change to $BASEDIR" 1
 
 declare -a FULL_CMD=()
+FULL_CMD=("cp" "${BASEDIR}/build.zig.zon" "${BASEDIR}/build.zig.zon.orig")
+# shellcheck disable=SC2068
+if out=$(${FULL_CMD[@]} 2>&1); then
+  mlog DEBUG "Made copy of build.zig.zon"
+  mlog DEBUG "cp Command=${FULL_CMD[*]}"
+  mlog VERBOSE "cp Command=${FULL_CMD[*]}"
+  [[ -n "$out" ]] && mlog DEBUG "$out"
+else
+  mlog FATAL "Failed copy build.zig.zon\ncp Cmmand=${FULL_CMD[*]}\n$out" 1
+fi
+
 FULL_CMD=("zig" "fetch" "--save" "git+https://github.com/FObersteiner/zdt")
 # shellcheck disable=SC2068
 if out=$(${FULL_CMD[@]} 2>&1); then
@@ -52,6 +63,30 @@ if out=$(${FULL_CMD[@]} 2>&1); then
   stripit "bin/${APP_NAME}"
 else
   mlog FATAL "Failed to build ${APP_NAME}\nCompilation Command=${FULL_CMD[*]}\n$out" 1
+fi
+
+FULL_CMD=("mv" "${BASEDIR}/build.zig.zon.orig" "${BASEDIR}/build.zig.zon")
+# shellcheck disable=SC2068
+if out=$(${FULL_CMD[@]} 2>&1); then
+  mlog DEBUG "Restoring build.zig.zon to original"
+  mlog DEBUG "mv Command=${FULL_CMD[*]}"
+  mlog VERBOSE "mv Command=${FULL_CMD[*]}"
+  [[ -n "$out" ]] && mlog DEBUG "$out"
+else
+  mlog FATAL "Failed move build.zig.zon.orig\nmv Cmmand=${FULL_CMD[*]}\n$out" 1
+fi
+
+if [ -d "${BASEDIR}/.zig-cache" ] && [ -z "$SAVE_BUILD_DATA" ]; then
+  FULL_CMD=("rm" "-rf" "${BASEDIR}/.zig-cache")
+  # shellcheck disable=SC2068
+  if out=$(${FULL_CMD[@]} 2>&1); then
+    mlog SUCCESS "Succesfully deleted .zig-cache directory"
+    mlog DEBUG "rm Command=${FULL_CMD[*]}"
+    mlog VERBOSE "rm Command=${FULL_CMD[*]}"
+    [[ -n "$out" ]] && mlog DEBUG "$out"
+  else
+    mlog FATAL "Failed remove .zig-chache\nrm Command=${FULL_CMD[*]}\n$out" 1
+  fi
 fi
 
 FULL_CMD=("diff" "-q" "$BASEDIR/bin/$APP_NAME" "$APP_BIN")
