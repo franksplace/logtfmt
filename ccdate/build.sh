@@ -47,11 +47,11 @@ if out=$(${FULL_CMD[@]} 2>&1); then
 
   stripit "bin/${APP_NAME}"
 else
-  mlog ERROR "Failed to build $APP_NAME\nCompilation Command=${FULL_CMD[*]}\n$out"
+  mlog FATAL "Failed to build $APP_NAME\nCompilation Command=${FULL_CMD[*]}\n$out" 1
 fi
 
 if [ -n "$ONLY_STATIC" ] || [ "$(uname)" == "Darwin" ]; then
-  exit
+  exit 0
 fi
 
 BOPTS=("-Ofast -s -DNDEBUG")
@@ -67,5 +67,7 @@ if out=$(${FULL_CMD[@]} 2>&1); then
 
   stripit "bin/${APP_NAME}-dynlink"
 else
-  mlog ERROR "Failed to build ${APP_NAME}-dynlink\nCompilation Command=${FULL_CMD[*]}\n$out"
+  mlog FATAL "Failed to build ${APP_NAME}-dynlink\nCompilation Command=${FULL_CMD[*]}\n$out" 1
 fi
+
+exit 0

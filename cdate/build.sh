@@ -52,7 +52,7 @@ else
 fi
 
 if [ -n "$ONLY_STATIC" ] || [ "$(uname)" == "Darwin" ]; then
-  exit
+  exit 0
 fi
 
 BOPTS=("-Ofast -s -DNDEBUG")
@@ -70,3 +70,5 @@ if out=$(${FULL_CMD[@]} 2>&1); then
 else
   mlog FATAL "Failed to build ${APP_NAME}-dynlink\nCompilation Command=${FULL_CMD[*]}\n$out" 1
 fi
+
+exit 0
