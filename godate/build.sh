@@ -49,3 +49,5 @@ mlog VERBOSE "Compilation Command=${FULL_CMD[*]}"
 mlog SUCCESS "Successfully built $APP_NAME (binary installed at bin/${APP_NAME})"
 
 stripit "bin/${APP_NAME}"
+
+exit 0

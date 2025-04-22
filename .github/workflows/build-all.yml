@@ -17,6 +17,7 @@ jobs:
           sudo apt-get -qqy update
           sudo apt-get -qqy install \
           binutils \
+          cython3 \
           curl \
           gcc-14 \
           g++-14 \
@@ -36,7 +37,7 @@ jobs:
           libstdc++-13-dev \
           libxml2-dev \
           libz3-dev \
-          manpages-posix-dev \
+          nasm \
           pkg-config \
           tzdata \
           unzip \
@@ -58,9 +59,12 @@ jobs:
           tar zxf anyzig.tgz
           sudo cp ./zig /usr/bin
       - run: echo "🖥️ The workflow is now ready to test your code on the runner."
-      - name: Running Build
+      - name: Running Debug & Verbose Build 
         run: |
           DEBUG=true VERBOSE=true ./build.sh all
+      - name: Running Standard build
+        run: |
+          ./build.sh all
       - run: echo "🍏 This job's status is ${{ job.status }}."
       - name: Running benchmark
         run: |
