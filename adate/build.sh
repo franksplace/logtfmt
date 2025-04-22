@@ -91,7 +91,7 @@ if [ -n "$ONLY_STATIC" ] || [ "$(uname)" == "Darwin" ]; then
 fi
 
 BOPTS=("-Ofast -s -DNDEBUG -no-pie")
-bcheck DEBUG && BOPTS=("-v")
+bcheck DEBUG && BOPTS=("-v -no-pie")
 
 FULL_CMD=("$C_CMD" "${BOPTS[@]}" -o "bin/${APP_NAME}-dynlink" -Wall "${BASEDIR}/$APP_NAME".o)
 # shellcheck disable=SC2068
