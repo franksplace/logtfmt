@@ -38,6 +38,7 @@ HYPERFINE_CMD=(hyperfine -i -N \
 [[ -x "bin/pydate"  ]] && HYPERFINE_CMD+=(-n "Compiled Python - pydate" bin/pydate)
 [[ -x "bin/godate"  ]] && HYPERFINE_CMD+=(-n "Go - godate" bin/godate)
 [[ -x "bin/zdate"  ]] && HYPERFINE_CMD+=(-n "Zig    - zdate" bin/zdate)
+[[ -x "bin/adate"  ]] && HYPERFINE_CMD+=(-n "Assembly -  adate" bin/adate)
 
 
 ${HYPERFINE_CMD[*]} 2>/dev/null
@@ -98,6 +99,11 @@ fi
 if [ -x "bin/zdate" ] ; then
   printf "%-15s %-20s " "zdate" "$(ls -lLk bin/zdate | awk '{print $5}')kb" 
   bin/zdate
+fi
+
+if [ -x "bin/adate" ] ; then
+  printf "%-15s %-20s " "adate" "$(ls -lLk bin/adate | awk '{print $5}')kb" 
+  bin/adate
 fi
 
 
