@@ -36,7 +36,8 @@ HYPERFINE_CMD=(hyperfine -i -N \
 [[ -x "bin/ccdate-dynlink" ]] && HYPERFINE_CMD+=(-n "C++   - ccdate-dynlink" bin/ccdate-dynlink)
 [[ -x "bin/pldate"  ]] && HYPERFINE_CMD+=(-n "Compiled Perl - pldate" bin/pldate)
 [[ -x "bin/pydate"  ]] && HYPERFINE_CMD+=(-n "Compiled Python - pydate" bin/pydate)
-[[ -x "bin/godate"  ]] && HYPERFINE_CMD+=(-n "Compiled Go - godate" bin/godate)
+[[ -x "bin/godate"  ]] && HYPERFINE_CMD+=(-n "Go - godate" bin/godate)
+[[ -x "bin/zdate"  ]] && HYPERFINE_CMD+=(-n "Zig    - zdate" bin/zdate)
 
 
 ${HYPERFINE_CMD[*]} 2>/dev/null
@@ -94,5 +95,9 @@ if [ -x "bin/godate" ] ; then
   bin/godate
 fi
 
+if [ -x "bin/zdate" ] ; then
+  printf "%-15s %-20s " "zdate" "$(ls -lLk bin/zdate | awk '{print $5}')kb" 
+  bin/zdate
+fi
 
 

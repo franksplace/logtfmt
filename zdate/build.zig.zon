@@ -1,0 +1,16 @@
+.{
+    .name = .zdate,
+    .version = "0.0.1",
+    .fingerprint = 0xfe9ae71578c99fb7,
+    .minimum_zig_version = "0.14.0",
+    .dependencies = .{},
+    .paths = .{
+        "build.zig",
+        "build.zig.zon",
+        "src",
+        "/usr/local/include",
+        "/usr/local/lib",
+        "/usr/include",
+        "/usr/lib",
+    },
+}

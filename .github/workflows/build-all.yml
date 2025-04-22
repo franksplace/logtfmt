@@ -36,6 +36,7 @@ jobs:
           libstdc++-13-dev \
           libxml2-dev \
           libz3-dev \
+          manpages-posix-dev \
           pkg-config \
           tzdata \
           unzip \
@@ -52,6 +53,10 @@ jobs:
           ./swiftly init --quiet-shell-followup --assume-yes
           . ~/.local/share/swiftly/env.sh
           hash -r
+          echo "Installing anyzig"
+          curl -s https://api.github.com/repos/marler8997/anyzig/releases/latest | grep "browser_download_url.*$(uname -m)-linux"  | cut -d: -f2,3 | tr -d \" | xargs curl -s -L -o anyzig.tgz -O
+          tar zxf anyzig.tgz
+          sudo cp ./zig /usr/bin
       - run: echo "🖥️ The workflow is now ready to test your code on the runner."
       - name: Running Build
         run: |

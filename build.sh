@@ -441,11 +441,16 @@ if [ "${1^^}" == "ALL" ]; then
   set -- ${B_OPTS[@]}
 fi
 
+EXIT_CODE=0
 for target in "$@"; do
   if [ ! -d "$target" ] && [ ! -x "$target/build.sh" ]; then
     mlog ERROR "$target is not a valid build target"
   else
     mlog INFO "Running build target $target"
-    "$target"/build.sh
+    if ! "$target"/build.sh; then
+      EXIT_CODE=1
+    fi
   fi
 done
+
+exit $EXIT_CODE
