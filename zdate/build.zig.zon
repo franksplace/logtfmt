@@ -8,5 +8,9 @@
         "build.zig",
         "build.zig.zon",
         "src",
+        "/usr/local/include",
+        "/usr/local/lib",
+        "/usr/include",
+        "/usr/lib",
     },
 }

@@ -10,6 +10,8 @@ pub fn build(b: *std.Build) void {
         .target = target,
         .optimize = optimize,
     });
+    exe.linkLibC();
+    exe.linkLibCpp();
 
     const zdt = b.dependency("zdt", .{
         .target = target,
