@@ -24,7 +24,7 @@ print -rP "%D{%FT%T.%6.%z}"
 
 Executable|Language|Version
 :---:|:---:|:---:
-adate | Assembly | Nasm
+adate | Assembly | Nasm & Apple as for ARM64 MacOS
 cdate | C | GCC 8+
 ccdate | C++ | Clang or GCC 14+
 godate | Go | 1.22+
