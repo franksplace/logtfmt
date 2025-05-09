@@ -71,7 +71,7 @@ elif [ "$UNAME_S" == "Darwin" ]; then
   MOVE_SUCCESS_INFO="${APP_NAME} x86 binary"
   FULL_CMD=("make" "-C" "${BASEDIR}")
   MOVE_CMD=("mv" "${BASEDIR}/${APP_NAME}_x86_64" "bin/${APP_NAME}")
-elif [ "${UNAME_S}" == "Linux"]; then
+elif [ "${UNAME_S}" == "Linux" ]; then
   COMPILE_SUCCESS_INFO="${APP_NAME}_linux binary"
   MOVE_SUCCESS_INFO="${APP_NAME} linux binary"
   FULL_CMD=("make" "-C" "${BASEDIR}")
