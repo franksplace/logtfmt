@@ -22,23 +22,6 @@ if ! type -afp nasm >/dev/null 2>&1; then
   mlog FATAL "Assembly compiled nasm not installed or not in PATH.\nFailed to compile $APP_NAME" 1
 fi
 
-declare -a FULL_CMD=()
-
-function objectCleanup() {
-  if [ -f "${BASEDIR}/${APP_NAME}*.o" ] && [ -z "$SAVE_BUILD_DATA" ]; then
-    FULL_CMD=("rm" "-f" "${BASEDIR}/${APP_NAME}.o")
-    # shellcheck disable=SC2068
-    if out=$(${FULL_CMD[@]} 2>&1); then
-      mlog SUCCESS "Succesfully deleted ${APP_NAME}.o object file"
-      mlog DEBUG "rm Command=${FULL_CMD[*]}"
-      mlog VERBOSE "rm Command=${FULL_CMD[*]}"
-      [[ -n "$out" ]] && mlog DEBUG "$out"
-    else
-      mlog FATAL "Failed remove ${APP_NAME}.o\nrm Command=${FULL_CMD[*]}\n$out" 1
-    fi
-  fi
-}
-
 if [ ! -d "bin" ]; then
   mlog INFO "Creating bin directory"
   #  out=$(mkdir bin 2>&1)
@@ -58,6 +41,9 @@ if bcheck VERBOSE; then
 else
   export _VERBOSE=0
 fi
+
+declare -a FULL_CMD=()
+declare UNAME_S UNAME_M
 
 UNAME_S=$(uname -s)
 UNAME_M=$(uname -m)
