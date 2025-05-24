@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 #
-# Copyright 2024-2025 Frank Stutz
+# Copyright 2025 Frank Stutz
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -27,62 +27,44 @@ ABSPATH="$(
 )"
 BASEDIR="$(dirname "$ABSPATH")"
 APP_NAME="$(basename "$BASEDIR")"
+CWD=$(pwd)
+APP_BIN="${CWD}/bin/${APP_NAME}"
 
 if ! declare -f mlog >/dev/null 2>&1; then
   source "$BASEDIR/../build.sh"
 fi
-cVerCheck
+
+! cargo --version >/dev/null 2>&1 && mlog ERROR "cargo is required" 1
 
 if [ ! -d "bin" ]; then
   mlog INFO "Creating bin directory"
-  #  out=$(mkdir bin 2>&1)
   if ! out=$(mkdir bin 2>&1); then
     mlog FATAL "Unable to bin directory\n$out" 1
   fi
 fi
 
-declare -a BOPTS=()
-BOPTS=("-Ofast -DNDEBUG")
-bcheck DEBUG && BOPTS=("-v")
+cd "$BASEDIR" || mlog ERROR "Unable to change to $BASEDIR" 1
 
-if [ "$(uname)" == "Linux" ]; then
-  BOPTS+=("-static -static-libgcc -static-libstdc++")
-fi
-
-declare -a FULL_CMD=()
-
-FULL_CMD=("$C_CMD" "${BOPTS[@]}" -o "bin/${APP_NAME}" -Wall "${BASEDIR}/$APP_NAME".c)
-
-# shellcheck disable=SC2068
-if out="$(${FULL_CMD[@]} 2>&1)"; then
-  mlog SUCCESS "Successfully built $APP_NAME (binary installed at bin/$APP_NAME)"
-  mlog DEBUG "Compilation Command=${FULL_CMD[*]}"
-  mlog VERBOSE "Compilation Command=${FULL_CMD[*]}"
-  [[ -n "$out" ]] && mlog DEBUG "$out"
-
-  stripit "bin/${APP_NAME}"
-else
-  mlog FATAL "Failed to build $APP_NAME\nCompilation Command=${FULL_CMD[*]}\n$out" 1
-fi
-
-if [ -n "$ONLY_STATIC" ] || [ "$(uname)" == "Darwin" ]; then
-  exit 0
-fi
-
-BOPTS=("-Ofast -s -DNDEBUG")
-bcheck DEBUG && BOPTS=("-v")
-
-FULL_CMD=("$C_CMD" "${BOPTS[@]}" -o "bin/${APP_NAME}-dynlink" -Wall "${BASEDIR}/$APP_NAME".c)
+FULL_CMD=("cargo" "build" "--release")
 # shellcheck disable=SC2068
 if out=$(${FULL_CMD[@]} 2>&1); then
-  mlog SUCCESS "Successfully built ${APP_NAME}-dynlib (binary installed at bin/${APP_NAME}-dynlink)"
+  mlog SUCCESS "Successfully built ${APP_NAME}"
   mlog DEBUG "Compilation Command=${FULL_CMD[*]}"
   mlog VERBOSE "Compilation Command=${FULL_CMD[*]}"
   [[ -n "$out" ]] && mlog DEBUG "$out"
-
-  stripit "bin/${APP_NAME}-dynlink"
 else
-  mlog FATAL "Failed to build ${APP_NAME}-dynlink\nCompilation Command=${FULL_CMD[*]}\n$out" 1
+  mlog FATAL "Failed to build ${APP_NAME}\nCompilation Command=${FULL_CMD[*]}\n$out" 1
+fi
+
+FULL_CMD=("cp" "-p" "${BASEDIR}/target/release/${APP_NAME}" "$APP_BIN")
+# shellcheck disable=SC2068
+if out=$(${FULL_CMD[@]} 2>&1); then
+  mlog SUCCESS "Successfully copied ${APP_NAME} to $APP_BIN"
+  mlog DEBUG "Copy Command=${FULL_CMD[*]}"
+  mlog VERBOSE "Copy Command=${FULL_CMD[*]}"
+  [[ -n "$out" ]] && mlog DEBUG "$out"
+else
+  mlog FATAL "Failed copy ${APP_NAME} to binary dir\nCopy Command=${FULL_CMD[*]}\n$out" 1
 fi
 
 exit 0
