@@ -52,3 +52,5 @@ if out=$(${FULL_CMD[@]} 2>&1); then
 else
   mlog FATAL "Failed copy ${APP_NAME} to binary dir\nCopy Command=${FULL_CMD[*]}\n$out" 1
 fi
+
+exit 0
