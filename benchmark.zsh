@@ -23,24 +23,56 @@ else
   fi
 fi
 
-HYPERFINE_CMD=(hyperfine -i -N \
-  -n "Bash  - Epoch Realtime" 'bash -c "t=$EPOCHREALTIME; printf \"%(%FT%T)T.${t#*.}%(%z)T\n\" \"${t%.*}\""' \
-  -n "Zsh   - Epoch Realtime" 'zsh -c "print -rP \"%D{%FT%T.%6.%z}\""' \
-  -n "Gnu   - date" "$GDATE_CMD +%FT%T.%6N%z" \
-)
+function fmtlist() {
+  local LEFT=$1
+  local RIGHT=$2
 
-[[ -x "bin/sdate"  ]] && HYPERFINE_CMD+=(-n "Swift - sdate" bin/sdate)
-[[ -x "bin/cdate"  ]] && HYPERFINE_CMD+=(-n "C     - cdate" bin/cdate)
-[[ -x "bin/cdate-dynlink" ]]  && HYPERFINE_CMD+=(-n "C     - cdate-dynlink" bin/cdate-dynlink)
-[[ -x "bin/ccdate" ]] && HYPERFINE_CMD+=(-n "C++   - ccdate" bin/ccdate)
-[[ -x "bin/ccdate-dynlink" ]] && HYPERFINE_CMD+=(-n "C++   - ccdate-dynlink" bin/ccdate-dynlink)
-[[ -x "bin/pldate"  ]] && HYPERFINE_CMD+=(-n "Compiled Perl - pldate" bin/pldate)
-[[ -x "bin/pydate"  ]] && HYPERFINE_CMD+=(-n "Compiled Python - pydate" bin/pydate)
-[[ -x "bin/godate"  ]] && HYPERFINE_CMD+=(-n "Go - godate" bin/godate)
-[[ -x "bin/zdate"  ]] && HYPERFINE_CMD+=(-n "Zig    - zdate" bin/zdate)
-[[ -x "bin/adate"  ]] && HYPERFINE_CMD+=(-n "Assembly -  adate" bin/adate)
-[[ -x "bin/adate-dynlink" ]] && HYPERFINE_CMD+=(-n "Assembly   - adate-dynlink" bin/ccdate-dynlink)
+  printf "%-19s - %s" "$1" "$2"
+}
 
+declare -A CMD_LIST
+
+CMD_LIST[bash]='bash -c "t=$EPOCHREALTIME; printf \"%(%FT%T)T.${t#*.}%(%z)T\n\" \"${t%.*}\""'
+CMD_LIST[zsh]='zsh -c "print -rP \"%D{%FT%T.%6.%z}\""' 
+CMD_LIST[Gnu]="$GDATE_CMD +%FT%T.%6N%z"
+
+declare -A LIST=()
+
+LIST[adate]="$(fmtlist "Assembly" "adate")"
+LIST[adate_arm64]="$(fmtlist "Assembly (arm64)" "adate_arm64")"
+LIST[adate_x86]="$(fmtlist "Assembly (x86-64)" "adate_x86")"
+LIST[bash]="$(fmtlist "Bash" "Epoch Realtime")"
+LIST[ccdate]="$(fmtlist "C++" "ccdate")"
+LIST[ccdate-dynlink]="$(fmtlist "C++" "ccdate-dynlink")"
+LIST[cdate]="$(fmtlist "C" "cdate")"
+LIST[cdate-dynlink]="$(fmtlist "C" "cdate-dynlink")"
+LIST[Gnu]="$(fmtlist "Gnu date" "date")"
+LIST[godate]="$(fmtlist "Go" "godate")"
+LIST[pldate]="$(fmtlist "Compiled Perl" "pldate")"
+LIST[pydate]="$(fmtlist "Compiled Python" "pydate")"
+LIST[rdate]="$(fmtlist "Rust" "rdate")"
+LIST[sdate]="$(fmtlist "Swift" "sdate")"
+LIST[zdate]="$(fmtlist "Zig" "zdate")"
+LIST[zsh]="$(fmtlist "Zsh" "Epoch Realtime")"
+
+declare -a HYPERFINE_CMD=(hyperfine -i -N)
+
+#for key val in "${(@kv)LIST}"; do
+#  if [ -n "${CMD_LIST[$key]}" ] ; then
+#    HYPERFINE_CMD+=(-n "$val" "${CMD_LIST[$key]}")
+#  else
+#    [[ -x "bin/$key" ]] && HYPERFINE_CMD+=(-n "$val" bin/$key)
+#  fi
+#done
+#
+#
+for key in "${(@ko)LIST}"; do
+  if [ -n "${CMD_LIST[$key]}" ] ; then
+    HYPERFINE_CMD+=(-n "${LIST[$key]}" "${CMD_LIST[$key]}")
+  else
+    [[ -x "bin/$key" ]] && HYPERFINE_CMD+=(-n "${LIST[$key]}" bin/$key)
+  fi
+done
 
 ${HYPERFINE_CMD[*]} 2>/dev/null
 
@@ -56,57 +88,8 @@ zsh -c 'print -rP "%D{%FT%T.%6.%z}"'
 printf "%-15s %-20s " "$GDATE_CMD" "$(whence -c $GDATE_CMD | xargs -I {} ls -lLk {} | awk '{print $5}')kb" 
 $GDATE_CMD +%FT%T.%6N%z
 
-if [ -x "bin/sdate" ] ; then
-  printf "%-15s %-20s " "sdate" "$(ls -lLk bin/sdate | awk '{print $5}')kb" 
-  bin/sdate
-fi
+for x in $(cd bin; ls -1 | sort) ; do
+  printf "%-15s %-20s " "$x" "$(ls -lLk bin/$x | awk '{print $5}')kb" 
+  bin/$x
+done
 
-if [ -x "bin/cdate" ] ; then
-  printf "%-15s %-20s " "cdate" "$(ls -lLk bin/cdate | awk '{print $5}')kb" 
-  bin/cdate
-fi
-
-if [ -x "bin/cdate-dynlink" ] ; then
-  printf "%-15s %-20s " "cdate-dynlink" "$(ls -lLk bin/cdate-dynlink | awk '{print $5}')kb" 
-  bin/cdate-dynlink
-fi
-
-if [ -x "bin/ccdate" ] ; then
-  printf "%-15s %-20s " "ccdate" "$(ls -lLk bin/ccdate | awk '{print $5}')kb" 
-  bin/ccdate
-fi
-
-if [ -x "bin/ccdate-dynlink" ] ; then
-  printf "%-15s %-20s " "ccdate-dynlink" "$(ls -lLk bin/ccdate-dynlink | awk '{print $5}')kb" 
-  bin/ccdate-dynlink
-fi
-
-if [ -x "bin/pldate" ] ; then
-  printf "%-15s %-20s " "pldate" "$(ls -lLk bin/pldate | awk '{print $5}')kb" 
-  bin/pldate
-fi
-
-if [ -x "bin/pydate" ] ; then
-  printf "%-15s %-20s " "pydate" "$(ls -lLk bin/pydate | awk '{print $5}')kb" 
-  bin/pydate
-fi
-
-if [ -x "bin/godate" ] ; then
-  printf "%-15s %-20s " "godate" "$(ls -lLk bin/godate | awk '{print $5}')kb" 
-  bin/godate
-fi
-
-if [ -x "bin/zdate" ] ; then
-  printf "%-15s %-20s " "zdate" "$(ls -lLk bin/zdate | awk '{print $5}')kb" 
-  bin/zdate
-fi
-
-if [ -x "bin/adate" ] ; then
-  printf "%-15s %-20s " "adate" "$(ls -lLk bin/adate | awk '{print $5}')kb" 
-  bin/adate
-fi
-
-if [ -x "bin/adate-dynlink" ] ; then
-  printf "%-15s %-20s " "adate-dynlink" "$(ls -lLk bin/adate-dynlink | awk '{print $5}')kb" 
-  bin/adate-dynlink
-fi

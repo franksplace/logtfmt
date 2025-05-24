@@ -30,6 +30,7 @@ ccdate | C++ | Clang or GCC 14+
 godate | Go | 1.22+
 pldate | Compiled Perl | 5.34+
 pydate | Compiled Python | 3+
+rdate | Rust | 2024
 sdate | Swift | 5.10+
 zdate | Zig | 0.14+
 
