@@ -28,10 +28,16 @@ pub fn main() !void {
     defer my_tz.deinit();
     const now_local: Datetime = try Datetime.now(.{ .tz = &my_tz });
 
-    println("{%Y-%m-%dT%H}:{%M}:{%S}.{d:0>6}{%z}", .{ now_local, now_local, now_local, now_local.nanosecond / 1000, now_local });
+    // zdt implements {f} formatting for Datetime:
+    // "{f}" -> ISO8601 / RFC3339 style like 2025-03-07T00:00:00-08:00. [web:45][web:139]
+    println("{f}", .{now_local});
 }
 
 fn println(comptime fmt: []const u8, args: anytype) void {
-    const stdout = std.io.getStdOut().writer();
+    var stdout_buffer: [256]u8 = undefined;
+    var stdout_writer = std.fs.File.stdout().writer(&stdout_buffer);
+    const stdout = &stdout_writer.interface;
+
     nosuspend stdout.print(fmt ++ "\n", args) catch return;
+    nosuspend stdout.flush() catch return;
 }
