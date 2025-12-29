@@ -28,9 +28,22 @@ pub fn main() !void {
     defer my_tz.deinit();
     const now_local: Datetime = try Datetime.now(.{ .tz = &my_tz });
 
-    // zdt implements {f} formatting for Datetime:
-    // "{f}" -> ISO8601 / RFC3339 style like 2025-03-07T00:00:00-08:00. [web:45][web:139]
-    println("{f}", .{now_local});
+    const ns = now_local.nanosecond;
+
+    // yyyy-mm-ddTHH:MM:SS.NNNNNNNNN<offset>
+    println(
+        "{d:0>4}-{d:0>2}-{d:0>2}T{d:0>2}:{d:0>2}:{d:0>2}.{d:0>9}{f}",
+        .{
+            now_local.year,
+            now_local.month,
+            now_local.day,
+            now_local.hour,
+            now_local.minute,
+            now_local.second,
+            ns,
+            now_local, // {f} uses zdt’s Datetime formatter (with offset). [web:74][web:47]
+        },
+    );
 }
 
 fn println(comptime fmt: []const u8, args: anytype) void {
