@@ -32,19 +32,17 @@ if ! declare -f mlog >/dev/null 2>&1; then
   source "$BASEDIR/../build.sh"
 fi
 
-mlog INFO "Installing PAR::Packer (pp) locally"
-if ! out=$(mkdir perl5 2>&1); then
-  mlog FATAL "Unable to create perl5 directory\n$out" 1
-fi
-if ! out=$(cpanm --no-interactive --no-prompt -L perl5 PAR::Packer); then
-  mlog FATAL "Unable to install PAR::Packer into perl5 directory\n$out" 1
-fi
+if ! pp --version 2>/dev/null | grep 'PAR Packager' >/dev/null 2>&1; then
+  mlog INFO "Installing PAR::Packer (pp) locally"
+  if ! out=$(mkdir perl5 2>&1); then
+    mlog FATAL "Unable to create perl5 directory\n$out" 1
+  fi
+  if ! out=$(cpanm --no-interactive --no-prompt -L perl5 PAR::Packer); then
+    mlog FATAL "Unable to install PAR::Packer into perl5 directory\n$out" 1
+  fi
 
-export PERL5LIB="$PWD/perl5/lib/perl5:$PERL5LIB"
-export PATH="$PWD/perl5/bin:$PATH"
-
-if ! type -a pp >/dev/null 2>&1; then
-  mlog FATAL "PAR::Packer (pp) not installed" 1
+  export PERL5LIB="$PWD/perl5/lib/perl5:$PERL5LIB"
+  export PATH="$PWD/perl5/bin:$PATH"
 fi
 
 if [ ! -d "bin" ]; then
@@ -55,10 +53,10 @@ if [ ! -d "bin" ]; then
 fi
 
 if ! pp -o "bin/${APP_NAME}" "${BASEDIR}/pdate".pl; then
-  rm -rf perl5 >/dev/null 2>&1
+  rm -rf perl5 >/dev/null 2>&1 || true
   mlog FATAL "Unable to build $APP_NAME" 1
 fi
-rm -rf perl5 >/dev/null 2>&1
+rm -rf perl5 >/dev/null 2>&1 || true
 
 mlog SUCCESS "Successfully built $APP_NAME (binary installed at bin/${APP_NAME})"
 exit 0
