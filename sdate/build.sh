@@ -38,7 +38,8 @@ swiftVerCheck
 # Configurable Variables
 ###########################
 if [ "$(uname)" == "Darwin" ]; then
-  CODE_SIGNATURE="${BUILD_CODE_SIGNATURE:-$(id -F)}"
+  CURRENT_SIGNERS="$((security find-identity -v -p codesigning | grep "$(id -F)" | cut -d'"' -f2) || id -F)"
+  CODE_SIGNATURE="${BUILD_CODE_SIGNATURE:-$CURRENT_SIGNERS}"
 else
   CODE_SIGNATURE="${BUILD_CODE_SIGNATURE:-$(id -un)}"
 fi

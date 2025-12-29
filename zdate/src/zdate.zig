@@ -39,7 +39,7 @@ pub fn main() !void {
 
     const us = now_local.nanosecond / 1000;
 
-    // +YYYY-MM-DDTHH:MM:SS.uuuuuu-0800
+    // YYYY-MM-DDTHH:MM:SS.uuuuuu-tzoffset (4 digit) (4 digit)
     println(
         "{d:0>4}-{d:0>2}-{d:0>2}T{d:0>2}:{d:0>2}:{d:0>2}.{d:0>6}{c}{d:0>2}{d:0>2}",
         .{
