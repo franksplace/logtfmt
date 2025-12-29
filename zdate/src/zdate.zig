@@ -24,24 +24,35 @@ pub fn main() !void {
     defer _ = gpa.deinit();
     const allocator = gpa.allocator();
 
-    var my_tz: Timezone = try Timezone.tzLocal(allocator);
-    defer my_tz.deinit();
-    const now_local: Datetime = try Datetime.now(.{ .tz = &my_tz });
+    var local_tz: Timezone = try Timezone.tzLocal(allocator);
+    defer local_tz.deinit();
 
-    const ns = now_local.nanosecond;
+    const now_local: Datetime = try Datetime.now(.{ .tz = &local_tz });
 
-    // yyyy-mm-ddTHH:MM:SS.NNNNNNNNN<offset>
+    const offset_seconds = now_local.utc_offset.?.seconds_east;
+    const offset_minutes: i32 = @intCast(@divTrunc(offset_seconds, 60));
+
+    const sign_char: u8 = if (offset_minutes < 0) '-' else '+';
+    const abs_minutes: i32 = if (offset_minutes < 0) -offset_minutes else offset_minutes;
+    const off_hh: u8 = @intCast(@divTrunc(abs_minutes, 60));
+    const off_mm: u8 = @intCast(@rem(abs_minutes, 60));
+
+    const us = now_local.nanosecond / 1000;
+
+    // +YYYY-MM-DDTHH:MM:SS.uuuuuu-0800
     println(
-        "{d:0>4}-{d:0>2}-{d:0>2}T{d:0>2}:{d:0>2}:{d:0>2}.{d:0>9}{f}",
+        "{d:0>4}-{d:0>2}-{d:0>2}T{d:0>2}:{d:0>2}:{d:0>2}.{d:0>6}{c}{d:0>2}{d:0>2}",
         .{
-            now_local.year,
+            @as(u16, @intCast(now_local.year)),
             now_local.month,
             now_local.day,
             now_local.hour,
             now_local.minute,
             now_local.second,
-            ns,
-            now_local, // {f} uses zdt’s Datetime formatter (with offset). [web:74][web:47]
+            us,
+            sign_char,
+            off_hh,
+            off_mm,
         },
     );
 }
