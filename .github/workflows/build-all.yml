@@ -64,7 +64,7 @@ jobs:
           curl -O https://ziglang.org/download/${_ZIG_VERSION}/zig-$(uname -m)-linux-${_ZIG_VERSION}.tar.xz 
           tar -Jxf zig-$(uname -m)-linux-${_ZIG_VERSION}.tar.xz --strip-components=1 -C /usr/local/bin zig-$(uname -m)-linux-${_ZIG_VERSION}/zig
           chmod +x /usr/local/bin/zig
-          zig --version
+          echo "Zig Version is $(zig version)"
       - run: echo "🖥️ The workflow is now ready to test your code on the runner."
       - name: Running Debug & Verbose Build
         run: |
