@@ -60,8 +60,9 @@ jobs:
           echo "####################################"
           echo "Installing Zig"
           echo "####################################"
-          curl -fsSL https://ziglang.org/download/0.15.2/zig-x86_64-linux-0.15.2.tar.xz | tar -xJ --strip-components=1 -C /usr/local/bin zig
+          curl -fsSL https://ziglang.org/download/0.15.2/zig-$(uname -m)-linux-0.15.2.tar.xz | tar -xvJ --strip-components=1 -C /usr/local/bin zig
           chmod +x /usr/local/bin/zig
+          zig --version
       - run: echo "🖥️ The workflow is now ready to test your code on the runner."
       - name: Running Debug & Verbose Build
         run: |
