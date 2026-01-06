@@ -49,15 +49,21 @@ jobs:
           sudo ln -snf /usr/bin/g++ /usr/bin/c++
           echo "c++ version is ..."
           c++ --version
+          echo "####################################"
           echo "Installing Swift"
-          curl -fsSL https://download.swift.org/swiftly/install.sh | bash
-          . ~/.local/share/swiftly/env.sh
+          echo "####################################"
+          curl -O https://download.swift.org/swiftly/linux/swiftly-$(uname -m).tar.gz
+          tar zxf swiftly-$(uname -m).tar.gz
+          ./swiftly init --quiet-shell-followup
+          . "${SWIFTLY_HOME_DIR:-$HOME/.local/share/swiftly}/env.sh"
           hash -r
+          echo "####################################"
           echo "Installing Zig"
-          curl -fsSL https://ziglang.org/download/0.14.0/zig-linux-x86_64-0.14.0.tar.xz | tar -xJ --strip-components=1 -C /usr/local/bin zig
+          echo "####################################"
+          curl -fsSL https://ziglang.org/download/0.15.2/zig-x86_64-linux-0.15.2.tar.xz | tar -xJ --strip-components=1 -C /usr/local/bin zig
           chmod +x /usr/local/bin/zig
       - run: echo "🖥️ The workflow is now ready to test your code on the runner."
-      - name: Running Debug & Verbose Build 
+      - name: Running Debug & Verbose Build
         run: |
           DEBUG=true VERBOSE=true ./build.sh all
       - name: Running Standard build
