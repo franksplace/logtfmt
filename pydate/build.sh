@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 #
-# Copyright 2024-2025 Frank Stutz
+# Copyright 2024-2026 Frank Stutz
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -40,10 +40,16 @@ if [ ! -d "bin" ]; then
   fi
 fi
 
+if brew --version >/dev/null 2>&1; then
+  export PATH="${PATH}:$(brew --prefix)/opt/cython/bin"
+fi
+
 if ! cython --version >/dev/null 2>&1; then
   if ! pip install cython >/dev/null 2>&1; then
     if ! pipx install cython >/dev/null 2>&1; then
-      mlog FATAL 'Unable to install cython' 2
+      if ! brew install cython >/dev/null 2>&1; then
+        mlog FATAL 'Unable to install cython' 2
+      fi
     fi
   fi
 fi
@@ -59,8 +65,8 @@ if ! gcc -Os $(python3-config --includes) "${BASEDIR}/pydate.c" -o "bin/${APP_NA
   mlog FATAL "Failed to create binary pydate" 4
 fi
 
-if ! rm -f "${APP_NAME}/pydate.c"; then
-  mlog WARN "Unable to clean up pydate C source file (${APP_NAME}/pydate.c)"
+if ! rm -f "${BASEDIR}/pydate.c"; then
+  mlog WARN "Unable to clean up pydate C source file (${BASEDIR}/pydate.c)"
 fi
 
 mlog SUCCESS "Successfully built ${APP_NAME} (binary installed at bin/${APP_NAME})"

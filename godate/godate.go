@@ -1,5 +1,5 @@
 /*
- * Copyright 2024-2025 Frank Stutz
+ * Copyright 2024-2026 Frank Stutz
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,10 +22,10 @@ import (
 )
 
 const (
-	ISO8660 = "2006-01-02T15:04:05.999999Z0700"
+	ISO8601 = "2006-01-02T15:04:05.999999Z0700"
 )
 
 func main() {
 	now := time.Now().Local()
-	fmt.Println(now.Format(ISO8660))
+	fmt.Println(now.Format(ISO8601))
 }

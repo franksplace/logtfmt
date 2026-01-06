@@ -1,6 +1,6 @@
-#!/usr/bin/env python3 
+#!/usr/bin/env python3
 #
-# Copyright 2024-2025 Frank Stutz
+# Copyright 2024-2026 Frank Stutz
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -15,6 +15,11 @@
 # limitations under the License.
 
 from datetime import datetime
+import sys
 
-print (datetime.now(tz=datetime.now().astimezone().tzinfo).strftime('%Y-%m-%dT%H:%M:%S.%f%z'))
-
+try:
+    now = datetime.now().astimezone()
+    print(now.strftime("%Y-%m-%dT%H:%M:%S.%f%z"))
+except Exception as e:
+    print(f"Error: {e}", file=sys.stderr)
+    sys.exit(1)

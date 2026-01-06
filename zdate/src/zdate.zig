@@ -1,5 +1,5 @@
 //
-// Copyright 2025 Frank Stutz
+// Copyright 2025-2026 Frank Stutz
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -29,7 +29,11 @@ pub fn main() !void {
 
     const now_local: Datetime = try Datetime.now(.{ .tz = &local_tz });
 
-    const offset_seconds = now_local.utc_offset.?.seconds_east;
+    const utc_offset = now_local.utc_offset orelse {
+        std.debug.print("Failed to get UTC offset\n", .{});
+        return error.UTCOffsetError;
+    };
+    const offset_seconds = utc_offset.seconds_east;
     const offset_minutes: i32 = @intCast(@divTrunc(offset_seconds, 60));
 
     const sign_char: u8 = if (offset_minutes < 0) '-' else '+';

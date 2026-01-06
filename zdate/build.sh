@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 #
-# Copyright 2024-2025 Frank Stutz
+# Copyright 2024-2026 Frank Stutz
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -52,7 +52,7 @@ if out=$(${FULL_CMD[@]} 2>&1); then
   mlog VERBOSE "cp Command=${FULL_CMD[*]}"
   [[ -n "$out" ]] && mlog DEBUG "$out"
 else
-  mlog FATAL "Failed copy build.zig.zon\ncp Cmmand=${FULL_CMD[*]}\n$out" 1
+  mlog FATAL "Failed copy build.zig.zon\ncp Command=${FULL_CMD[*]}\n$out" 1
 fi
 
 FULL_CMD=("zig" "fetch" "--save" "git+https://github.com/FObersteiner/zdt")
@@ -63,7 +63,7 @@ if out=$(${FULL_CMD[@]} 2>&1); then
   mlog VERBOSE "zig Command=${FULL_CMD[*]}"
   [[ -n "$out" ]] && mlog DEBUG "$out"
 else
-  mlog FATAL "Failed fetch zdt with zig\nzig Cmmand=${FULL_CMD[*]}\n$out" 1
+  mlog FATAL "Failed fetch zdt with zig\nzig Command=${FULL_CMD[*]}\n$out" 1
 fi
 
 FULL_CMD=("zig" "build" "install" "--prefix" "." "--prefix-exe-dir" "bin" "--release=small")
@@ -99,7 +99,7 @@ if [ -d "${BASEDIR}/.zig-cache" ] && [ -z "$SAVE_BUILD_DATA" ]; then
     mlog VERBOSE "rm Command=${FULL_CMD[*]}"
     [[ -n "$out" ]] && mlog DEBUG "$out"
   else
-    mlog FATAL "Failed remove .zig-chache\nrm Command=${FULL_CMD[*]}\n$out" 1
+    mlog FATAL "Failed remove .zig-cache\nrm Command=${FULL_CMD[*]}\n$out" 1
   fi
 fi
 
@@ -112,6 +112,10 @@ if out=$(${FULL_CMD[@]} 2>&1); then
 else
   mlog VERBOSE "diff Command=${FULL_CMD[*]}"
   mlog "VERBOSE" "freshly built $APP_BIN is not identical to final binary, copy operation needed"
+  if diff "$BASEDIR/bin/$APP_NAME" "$APP_BIN" >/dev/null 2>&1; then
+    mlog VERBOSE "Files are identical despite diff exit code"
+    exit 0
+  fi
   [[ -n "$out" ]] && mlog DEBUG "$out"
 fi
 

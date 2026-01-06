@@ -1,5 +1,5 @@
 /*
-Copyright 2024 Frank Stutz.
+Copyright 2024-2026 Frank Stutz.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -25,8 +25,16 @@ int main () {
   struct tm tm;
   int exitval = clock_gettime(CLOCK_REALTIME, &now);
 
+  if (exitval != 0) {
+    perror("clock_gettime");
+    return 1;
+  }
+
   tzset();
-  localtime_r(&now.tv_sec, &tm);
+  if (localtime_r(&now.tv_sec, &tm) == NULL) {
+    perror("localtime_r");
+    return 1;
+  }
 
   char buf[sizeof "9999-01-02T01:02:03.999999+0000"];
   size_t bufsize = sizeof buf;
@@ -34,9 +42,13 @@ int main () {
   int off = 0;
 
   off = strftime(buf, bufsize, "%FT%T", &tm);
+  if (off == 0) {
+    fprintf(stderr, "strftime failed\n");
+    return 1;
+  }
   off += snprintf(buf+off, bufsize-off, ".%06ld", now.tv_nsec/1000);
   off += strftime(buf+off, bufsize-off, "%z", &tm);
 
   printf("%s\n", buf);
-  return exitval;
+  return 0;
 }

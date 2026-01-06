@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 #
-# Copyright 2024-2025 Frank Stutz
+# Copyright 2024-2026 Frank Stutz
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -38,7 +38,7 @@ swiftVerCheck
 # Configurable Variables
 ###########################
 if [ "$(uname)" == "Darwin" ]; then
-  CURRENT_SIGNERS="$((security find-identity -v -p codesigning | grep "$(id -F)" | cut -d'"' -f2) || id -F)"
+  CURRENT_SIGNERS="$( (security find-identity -v -p codesigning | grep "$(id -F)" | cut -d'"' -f2 | grep 'Developer ID Application') || id -F)"
   CODE_SIGNATURE="${BUILD_CODE_SIGNATURE:-$CURRENT_SIGNERS}"
 else
   CODE_SIGNATURE="${BUILD_CODE_SIGNATURE:-$(id -un)}"
@@ -94,9 +94,9 @@ fi
 mlog DEBUG "Running ${BUILD_CMD[*]}"
 
 if ! out="$("${BUILD_CMD[@]}" 2>&1)"; then
-  mlog FATAL "Failed to build unverisal binary $APP_NAME"
+  mlog FATAL "Failed to build universal binary $APP_NAME"
   mlog FATAL "Compilation Command: ${BUILD_CMD[*]}"
-  if [ -n "$OUT" ]; then
+  if [ -n "$out" ]; then
     mlog FATAL "$out"
   fi
   exit 1
@@ -125,10 +125,10 @@ if ! out="$("${COPY_CMD[@]}" 2>&1)"; then
   mlog SUCCESS "Successfully built universal binary $APP_NAME"
   mlog VERBOSE "Copy Command=${COPY_CMD[*]}"
   mlog FATAL "Failed to copy the built binary $PACKAGE_APP_NAME to $APP_BIN"
-  if [ -n "$OUT" ]; then
+  if [ -n "$out" ]; then
     mlog FATAL "$out"
   fi
-  eixt 1
+  exit 1
 fi
 
 if ! $SAVE_BUILD_DATA; then

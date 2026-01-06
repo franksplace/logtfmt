@@ -1,5 +1,5 @@
 ;
-; Copyright 2024-2025 Frank Stutz
+; Copyright 2024-2026 Frank Stutz
 ;
 ; Licensed under the Apache License, Version 2.0 (the "License");
 ; you may not use this file except in compliance with the License.
@@ -22,7 +22,7 @@ output_fmt: .asciz  "%s.%06ld%c%02ld%02ld\n"
     .p2align 3
 tv:     .space 16
 tm:     .space 56
-time_str: .space 20
+time_str: .space 32  ; Increased from 20 to 32 for ISO 8601 format
 
 .text
 .global _main

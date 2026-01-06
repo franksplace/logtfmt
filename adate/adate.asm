@@ -1,5 +1,5 @@
 ;
-; Copyright 2024-2025 Frank Stutz
+; Copyright 2024-2026 Frank Stutz
 ;
 ; Licensed under the Apache License, Version 2.0 (the "License");
 ; you may not use this file except in compliance with the License.
@@ -33,7 +33,7 @@ section .data
 section .bss
     tv: resq 2
     tm: resb 56      ; Size for both OS
-    time_str: resb 20
+    time_str: resb 32  ; Increased from 20 to 32 for ISO 8601 format (YYYY-MM-DDTHH:MM:SS.XXXXXX+ZZZZ)
 
 section .text
     global SYM(main)
@@ -53,6 +53,8 @@ SYM(main):
     lea rdi, [rel tv]
     xor rsi, rsi
     call SYM(gettimeofday)
+    test rax, rax
+    js .error_exit
 
     ; Convert to local time
     lea rdi, [rel tv]
@@ -105,5 +107,14 @@ SYM(main):
     mov eax, EXIT_SYSCALL
     %endif
     xor edi, edi
+    syscall
+
+.error_exit:
+    mov rdi, 1
+    %ifidn __OUTPUT_FORMAT__, macho64
+    mov rax, EXIT_SYSCALL
+    %else
+    mov eax, EXIT_SYSCALL
+    %endif
     syscall
 

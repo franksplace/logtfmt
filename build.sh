@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 #
-# Copyright 2024-2025 Frank Stutz
+# Copyright 2024-2026 Frank Stutz
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -182,9 +182,9 @@ function signit() {
   declare -x APP=$1
   if [ -z "$APP" ] || [ ! -r "$APP" ]; then
     if [ -z "$APP" ]; then
-      mlog ERROR "app needs to be defined and reable to signit"
+      mlog ERROR "app needs to be defined and readable to signit"
     else
-      mlog ERROR "app ($APP) needs to be reable to signit"
+      mlog ERROR "app ($APP) needs to be readable to signit"
     fi
     return 1
   fi
@@ -392,7 +392,7 @@ function stripit() {
   local FILE=$1
   local STRIP_CMD='' out=''
 
-  [[ -z "$FILE" ]] && mlog ERROR "stripit function requries a file" && return 1
+  [[ -z "$FILE" ]] && mlog ERROR "stripit function requires a file" && return 1
   [[ ! -r "$FILE" ]] && mlog ERROR "stripit function requires a file to be readable " && return 1
 
   # we don't strip on debug binaries
