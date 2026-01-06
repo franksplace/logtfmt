@@ -10,7 +10,6 @@ jobs:
       - run: echo "🔎 The name of your branch is ${{ github.ref }} and your repository is ${{ github.repository }}."
       - name: Checking out repository code
         uses: actions/checkout@v4
-        uses: lugg/setup-zig@v2
       - run: echo "💡 The ${{ github.repository }} repository has been cloned to the runner."
       - name: Installing prerequisite packages
         run: |
@@ -58,8 +57,19 @@ jobs:
           ./swiftly init --quiet-shell-followup
           . "${SWIFTLY_HOME_DIR:-$HOME/.local/share/swiftly}/env.sh"
           hash -r
+          echo "####################################"
+          echo "Installing Zig"
+          echo "####################################"
+          export _ZIG_VERSION=0.15.2
+          curl -O https://ziglang.org/download/${_ZIG_VERSION}/zig-$(uname -m)-linux-${_ZIG_VERSION}.tar.xz 
+          tar -Jxf zig-$(uname -m)-linux-${_ZIG_VERSION}.tar.xz --strip-components=1 -C /usr/local/bin zig-$(uname -m)-linux-${_ZIG_VERSION}/zig
+          chmod +x /usr/local/bin/zig
           echo "Zig Version is $(zig version)"
-      - run: echo "🖥️ The workflow is now ready to test your code on the runner."
+      - name: Setup Zig
+      - uses: mlugg/setup-zig@v2
+      - run: |
+          echo "Zig Version is $(zig version)"
+          echo "🖥️ The workflow is now ready to test your code on the runner."
       - name: Running Debug & Verbose Build
         run: |
           DEBUG=true VERBOSE=true ./build.sh all
